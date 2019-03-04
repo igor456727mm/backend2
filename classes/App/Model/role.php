@@ -7,5 +7,10 @@ class Role extends \PHPixie\ORM\Model {
 
     public $table = 'mst_role_tab';
     public $id_field = 'CODE';
- 
+    protected $has_many = array(
+        'avroles' => array(
+            'model' => 'role',
+            'key' => 'avrole_id',
+        ),
+        );
 }

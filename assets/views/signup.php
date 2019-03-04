@@ -27,14 +27,14 @@
             <span>EMAIL</span><br/>
             <input class='signup_input' id='email' autocomplete="off" 
                    onkeyup='checkEmail(this.value);' onchange='checkEmail(this.value);' 
-                   type="text" name="email" placeholder="<? echo $localizator->__('Your email...'); ?>" value=''>
+                   type="text" name="email" placeholder="Your email..." value=''>
             <span id='checkemail' class="glyphicon">
             </span>
             <span id='checking_email' style="font-size: 10px; margin-top: 0px; color: red;"> </span><br/>
-            <span><? echo $localizator->__('PASSWORD'); ?></span><br/>
+            <span>PASSWORD</span><br/>
             <input  class='signup_input' id='psw' autocomplete="off" class="password" 
                     onkeyup='checkPassword(this.value);' onchange='checkPassword(this.value);' 
-                    type="password" placeholder="<? echo $localizator->__('Your password...'); ?>"  style="height: 28px;">
+                    type="password" placeholder="Your password..."  style="height: 28px;">
             <span id='checkpsw' class="glyphicon">
             </span>
             <span id='checking_psw' style="font-size: 10px; color: red;"></span><br/>
@@ -42,7 +42,7 @@
 
             <div class="row">
                 <div class="col-md-12" style="text-align:center;">
-                    <button submitform='true' id='submit' disabled onclick="submitUserInfo();" class="btn btn-success" style="width: auto;"><? echo $localizator->__('Create account'); ?></button>
+                    <button submitform='true' id='submit' disabled onclick="submitUserInfo();" class="btn btn-success" style="width: auto;">Create account</button>
                 </div>
 
             </div>
@@ -74,7 +74,7 @@
         if (name.length * domain.length == 0)
         {
             document.getElementById('checking_email').innerHTML = 
-                    '<? echo $localizator->__('The email format is wrong.'); ?>';
+                    '<? echo "The email format is wrong"; ?>';
             document.getElementById('checkemail').src = '/img/email2.png';
             ready_email = false;
             checkFields();
@@ -85,7 +85,7 @@
         var $url = "/apiopen/checkemail";
 
         console.log($url);
-        document.getElementById('checking_email').innerHTML = '<? echo $localizator->__('Checking...'); ?>';
+        document.getElementById('checking_email').innerHTML = '<? echo "Checking..."; ?>';
 
         httpRequest = new XMLHttpRequest();
         httpRequest.open('POST', $url, true);
@@ -106,13 +106,13 @@
                     else
                     {
                         document.getElementById('checking_email').innerHTML = 
-                                '<? echo $localizator->__('The email exists. Please choose another email.'); ?>';
+                                '<? echo "The email exists. Please choose another email."; ?>';
                         document.getElementById('checkemail').src = '/img/email2.png';
                         ready_email = false;
                     }
                 } else {
                     document.getElementById('checking_email').innerHTML = 
-                            '<? echo $localizator->__('No connection to server. Please try again.'); ?>';
+                            '<? echo "No connection to server. Please try again."; ?>';
                     document.getElementById('checkemail').src = '/img/email2.png';
                     ready_email = false;
                 }
@@ -129,7 +129,7 @@
 
         if (name.length == 0)
         {
-            document.getElementById('checking_name').innerHTML = '<? echo $localizator->__('The name must be filled.'); ?>';
+            document.getElementById('checking_name').innerHTML = '<? echo "The name must be filled"; ?>';
             document.getElementById('checkname').src = '/img/email2.png';
             ready_name = false;
             checkFields();
@@ -138,7 +138,7 @@
 
         var $url = "/apiopen/checkname/";
         console.log($url);
-        document.getElementById('checking_name').innerHTML = '<? echo $localizator->__('Checking...'); ?>';
+        document.getElementById('checking_name').innerHTML = '<? echo "Checking..."; ?>';
 
         httpRequest = new XMLHttpRequest();
         httpRequest.open('POST', $url, true);
@@ -159,13 +159,13 @@
                     else
                     {
                         document.getElementById('checking_name').innerHTML =
-                                '<? echo $localizator->__('The name exists. Please choose another name.'); ?>';
+                                '<? echo "The name exists. Please choose another name."; ?>';
                         document.getElementById('checkname').src = '/img/email2.png';
                         ready_name = false;
                     }
                 } else {
                     document.getElementById('checking_name').innerHTML = 
-                            '<? echo $localizator->__('No connection to server. Please try again.'); ?>';
+                            '<? echo "No connection to server. Please try again."; ?>';
                     document.getElementById('checkname').src = '/img/email2.png';
                     ready_name = false;
                 }
@@ -191,7 +191,7 @@
 
             document.getElementById('checkpsw').src = '/img/email2.png';
             document.getElementById('checking_psw').innerHTML = 
-                    '<? echo $localizator->__('The password must not be less then 8 symbols.'); ?>';
+                    '<? echo "The password must not be less then 8 symbols"; ?>';
             ready_psw = false;
         }
         checkFields();
@@ -231,7 +231,7 @@
                     {
                         document.getElementById('registering').innerHTML = 'Your account is registered. Please activate it with the link in your email.';
                         document.getElementById('registered').src = '/img/email1.png';
-                        document.location='/hqex';
+                       // document.location='/';
                         ready_name = true;
                     }
                     else

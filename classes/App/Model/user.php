@@ -8,6 +8,10 @@ class User extends \PHPixie\ORM\Model {
 
     public $table = 'mst_user_tab';
     public $id_field = 'ID';
+    protected $belongs_to = array(
+        'org' => array('model' => 'org', 'key' => 'org_id'),
+        'sts' => array('model' => 'usersts', 'key' => 'user_sts_type_cd')
+    );
     protected $has_one = array(
         'userapi' => array(
             'model' => 'userapi',
@@ -38,7 +42,11 @@ class User extends \PHPixie\ORM\Model {
         'usertokens' => array(
             'model' => 'usertoken',
             'key' => 'user_id'
-        )
+        ),
+        'stshis' => array(
+            'model' => 'userstshis',
+            'key' => 'user_id'
+        ),
     );
 
     public function setstatus($status) {
@@ -70,7 +78,6 @@ class User extends \PHPixie\ORM\Model {
         return $res;
     }
 
-
     public function eula_agreed($TYPE_CODE) {
         date_default_timezone_set('Europe/Dublin');
         $now = date('YYYY-mm-dd');
@@ -94,7 +101,5 @@ class User extends \PHPixie\ORM\Model {
                 find();
         return $eula;
     }
-
-   
 
 }
