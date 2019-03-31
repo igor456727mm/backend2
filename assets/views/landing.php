@@ -1,9 +1,9 @@
 <?php ?>
 <link href="/css/landing.css" rel="stylesheet">
-<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600,700' rel='stylesheet' type='text/css'>
-<link href='http://fonts.googleapis.com/css?family=Lobster+Two' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Lobster+Two' rel='stylesheet' type='text/css'>
 
-<link href='http://fonts.googleapis.com/css?family=Droid+Serif:400,400italic' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Droid+Serif:400,400italic' rel='stylesheet' type='text/css'>
 
 
 <!-- Top Starts -->
@@ -115,45 +115,7 @@
                 </div>
             </div>
         </div>
-        <hr>
-        <!-- shot2 ends -->
-
-        <!-- shot3 
-        <div class="row">
-            <div class="col-md-4">
-                <div class="screenshot">
-                    <img src="/img/pose.jpg" alt="image" class="img-responsive"/>
-                </div>
-            </div>
-            <div class="col-md-8">
-                <div class="shotcontent">
-                    <h3>For gyms and fitnesses<span class="text-muted"> Gym exercises estimation</span></h3>
-                    <p class="shot-para">Estimate your gym exercise with our solution. </p> 
-                    <hr>
-
-                    <div class="row">
-                        <div class="col-md-6 col-xs-6">
-                            <div class="shot-content-body">
-                                <h4><img src='/img/bizaya_cloud.png' style='height:20px;'> Real-time estimation.</h4>
-                                <p> Estimate your pose during exercise . </p>
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-xs-6">
-                            <div class="shot-content-body">
-                                <h4><img src='/img/bizaya_cloud.png' style='height:20px;'> Suggestions and corrections.</h4>
-                                <p> Get corrections for your exercise. </p>
-                            </div>
-                        </div>
-                    </div>
-                    <hr>
-                    <a href="http://facecom.io/main/signup" class="download" style="margin-bottom: 15px;"> Sign up</a>
-                </div>
-            </div>
-        </div>
-        <!-- shot3 ends -->
-        <hr>
     </div>
-
 </div>
 
 <div class="container">

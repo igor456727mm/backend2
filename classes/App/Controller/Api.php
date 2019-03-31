@@ -244,6 +244,34 @@ class Api extends \App\Page {
 
         $this->view->subview = 'apianswer';
     }
+    
+        public function action_getuseractivationlink() {
+
+        if ($this->view->message) {
+            return;
+        }
+
+        $role = $this->user->roles->where('CODE', 'ADMIN')->find();
+        if (!$role->loaded()) {
+            $this->view->message = json_encode(array('Error' => "You dont't have access to this method", 'Result' => 'getuseractivationlink', 'Data' => ''));
+            return;
+        }
+
+        $user = $this->check_field('user_id', 'user', 'ID');
+        if (!is_object($user)) {
+            $this->view->message = json_encode(array('Error' => $user, 'Result' => 'getuseractivationlink', 'Data' => ''));
+            return;
+        }
+
+
+        if ((!$user->loaded())||($user->ACTIVE_FL==1)) {
+            $this->view->message = json_encode(array('Error' => 'User not found', 'Result' => 'getuseractivationlink', 'Data' => ''));
+        } else {
+            $this->view->message = json_encode(array('Error' => '', 'Result' => 'getuseractivationlink', 'Data' => 'https://www.dostavkalm.ru/activate.xhtml?uid='.$user->ACT_KEY));
+        }
+
+        $this->view->subview = 'apianswer';
+    }
 
     public function action_addrole() {
 
@@ -363,7 +391,7 @@ class Api extends \App\Page {
 
         require '../assets/config/env.php';
         $rc = md5(mt_rand(1000000000, 2000000000));
-        $res = $this->pixie->email->send('ikozyrev@gmail.com', array($site_email => "Доставка ЛМ"), "Доставка2 в магазины Леруа Мерлен - запрос на изменение пароля", "Уважаемый пользователь!
+        $res = $this->pixie->email->send('test-kbkay@mail-tester.com', array($site_email => "Доставка ЛМ"), "Доставка2 в магазины Леруа Мерлен - запрос на изменение пароля", "Уважаемый пользователь!
 Для изменения пароля перейдите по ссылке: 
 " .
                 $site_url . '/restore.xhtml?rc=' . $rc . "
@@ -577,16 +605,16 @@ class Api extends \App\Page {
                     where('ORG_NM', $org)->
                     find();
 
-          //  if (!$org_e->loaded()) {
-                $org_type_e = $this->pixie->orm->get('orgtype')->
-                        where('ORG_TYPE_NM', $org_type)->
-                        find();
-                if ($org_type_e->loaded()) {
-                    $org_e->ORG_TYPE_CD = $org_type_e->ORG_TYPE_CD;
-                } else {
-                    $org_e->ORG_TYPE_CD = 'TRANSPORT_COMPANY';
-                }
-          //  }
+            //  if (!$org_e->loaded()) {
+            $org_type_e = $this->pixie->orm->get('orgtype')->
+                    where('ORG_TYPE_NM', $org_type)->
+                    find();
+            if ($org_type_e->loaded()) {
+                $org_e->ORG_TYPE_CD = $org_type_e->ORG_TYPE_CD;
+            } else {
+                $org_e->ORG_TYPE_CD = 'TRANSPORT_COMPANY';
+            }
+            //  }
 
 
             $org_e->ORG_NM = $org;
@@ -1284,9 +1312,22 @@ class Api extends \App\Page {
 
         $org = $this->user->org;
 
+        $date_from = $this->check_field("date_from", "", "", false, false, false)->value;
+        $date_to = $this->check_field("date_to", "", "", false, false, false)->value;
+
+        if ($date_from == '') {
+            $date_from = '2000-01-01';
+        }
+        if ($date_to == '') {
+            $date_to = '9999-01-01';
+        }
+
         if ($role_admin->loaded()) {
             //$pnts = $this->pixie->orm->get('pnt')->with('transp')->with('locsrc')->with('loctgt')->with('sts')->find_all();
-            $pnts = $this->pixie->orm->get('pntall')->find_all();
+            $pnts = $this->pixie->orm->get('pntall')->
+                    where('LOC_PLAN_DTTM', '>=', $date_from)->
+                    where('and', array('LOC_PLAN_DTTM', '<=', $date_to))->
+                    find_all();
         } else if ($role_transp->loaded() || $role_vendor->loaded()) {
             //$pnts = $this->pixie->orm->get('transp')->where('ORG_ID', $org->id())->pnts->find_all();
             $pnts = $this->pixie->orm->get('pntall')->where('ORG_ID', $org->id())->find_all();
