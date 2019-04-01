@@ -1350,7 +1350,7 @@ class Api extends \App\Page {
                    // where('or',array('ORG_TGT_ID',$org->id()))->
                     find_all();
                    // query->query()[0];
-            die($pnts);
+           // die($pnts);
            // $pnts_shop = $this->pixie->orm->get('pntall')->
            //         where('ORG_TGT_ID', $org->id())->
            //         find_all();
