@@ -1310,7 +1310,7 @@ class Api extends \App\Page {
                 where('CODE', 'SHOP')->
                 find();
         if (!($role_admin->loaded() || ($role_transp->loaded()) || ($role_vendor->loaded()) || ($role_rc->loaded()) || ($role_shop->loaded()))) {
-            $this->view->message = json_encode(array('Error' => "You dont't have access to this method", 'Result' => 'reguser', 'Data' => ''));
+            $this->view->message = json_encode(array('Error' => "You dont't have access to this method", 'Result' => 'getallpoints', 'Data' => ''));
             return;
         }
 
