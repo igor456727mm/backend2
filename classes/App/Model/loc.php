@@ -23,6 +23,9 @@ class Loc extends \PHPixie\ORM\Model {
         $dttm = date("Y-m-d H:i:s");
         $this->STS_DTTM = $dttm;
         $this->save();
+        $this->org->ORG_STS_TYPE_CD = $status;
+        $this->org->STS_DTTM = $dttm;
+        $this->org->save();
     }
 
 }

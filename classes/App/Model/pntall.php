@@ -8,6 +8,11 @@ class Pntall extends \PHPixie\ORM\Model {
 
     public $table = 'glr_allpoints';
     public $id_field = 'TRNSP_PNT_ID';
-    
+    protected $belongs_to = array(
+        'transp' => array(
+            'model' => 'transp',
+            'key' => 'TRNSP_ID'
+        ),
+    );
 
 }
