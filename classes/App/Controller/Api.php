@@ -1342,13 +1342,14 @@ class Api extends \App\Page {
                     where('or', array('ORG_TGT_ID', $org->id()))->
                     find_all();
         } else if ($role_shop->loaded()) {
+            $pnts=$this->pixie->orm->get('org')->getallpoints($org->id());
             //$pnts = $this->pixie->orm->get('org')->where('ORG_TYPE_CD','RC')->loc->pnts->find_all();
-            $pnts = $this->pixie->orm->get('pntall')->
-                    where('ORG_TGT_ID', $org->id())->
-                    transp->pntall->
+          //  $pnts = $this->pixie->orm->get('pntall')->
+            //        where('ORG_TGT_ID', $org->id())->
+              //      transp->pntall->
                     //where('LOC_TGT_TYPE_CD', 'RC')->
                    // where('or',array('ORG_TGT_ID',$org->id()))->
-                    find_all();
+                //    find_all();
                    // query->query()[0];
            // die($pnts);
            // $pnts_shop = $this->pixie->orm->get('pntall')->

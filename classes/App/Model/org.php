@@ -15,10 +15,17 @@ class Org extends \PHPixie\ORM\Model {
         ),
     );
     protected $has_one = array(
-        'loc'=> array(
+        'loc' => array(
             'model' => 'loc',
             'key' => 'org_id'
         ),
     );
+
+    public function getallpoints() {
+        $org_id = $this->id();
+        $qry = "select * from glr_allpoints a where a.TRNSP_ID in (select TRNSP_ID from glr_allpoints a1 where a1.ORG_TGT_ID=$org_id) and (ORG_TGT_ID=$org_id or LOC_TGT_TYPE_CD='RC')";
+        $res = $this->conn->execute($qry);
+        return $res;
+    }
 
 }
