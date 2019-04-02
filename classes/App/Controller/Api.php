@@ -392,7 +392,7 @@ class Api extends \App\Page {
 
         require '../assets/config/env.php';
         $rc = md5(mt_rand(1000000000, 2000000000));
-        $res = $this->pixie->email->send('test-kbkay@mail-tester.com', array($site_email => "Доставка ЛМ"), "Доставка2 в магазины Леруа Мерлен - запрос на изменение пароля", "Уважаемый пользователь!
+        $res = $this->pixie->email->send('ikozyrev-whateveryouwant@mail-tester.com', array($site_email => "Доставка ЛМ"), "Доставка2 в магазины Леруа Мерлен - запрос на изменение пароля", "Уважаемый пользователь!
 Для изменения пароля перейдите по ссылке: 
 " .
                 $site_url . '/restore.xhtml?rc=' . $rc . "
