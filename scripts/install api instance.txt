@@ -9,5 +9,6 @@ sudo cp -f 001-80.conf /etc/apache2/sites-enabled/001-80.conf
 sudo rm /etc/apache2/sites-enabled/000-default.conf
 sudo a2enmod rewrite
 sudo cp -f php.ini /etc/php/7.2/apache2/php.ini
+sudo apt-get install php-mbstring
 sudo systemctl restart apache2
 sudo php ./composer.phar update -o  --prefer-dist
