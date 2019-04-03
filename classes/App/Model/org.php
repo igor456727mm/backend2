@@ -31,6 +31,7 @@ class Org extends \PHPixie\ORM\Model {
         }
         $qry = "select * from glr_allpoints a where a.TRNSP_ID in (select TRNSP_ID from glr_allpoints a1 where a1.ORG_TGT_ID=$org_id) and (ORG_TGT_ID=$org_id or LOC_TGT_TYPE_CD='RC')".$date_filter;
         $res = $this->conn->execute($qry);
+        die($qry);
         return $res;
     }
 
