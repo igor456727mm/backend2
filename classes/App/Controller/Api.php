@@ -1151,7 +1151,8 @@ class Api extends \App\Page {
         $loc_tgt_lat = $pnt->loctgt->LAT;
         $loc_tgt_lon = $pnt->loctgt->LON;
         $d = $this->haversineGreatCircleDistance($lat, $lon, $loc_tgt_lat, $loc_tgt_lon);
-        if ($d > 1000) {
+        //if ($d > 1000) {
+        if (false) {
             $this->view->message = json_encode(array('Error' => 'You are not in 1km radius of the destination point.', 'Result' => 'driverfinish', 'Data' => ''));
             return;
         } else {
