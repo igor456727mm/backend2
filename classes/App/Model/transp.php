@@ -22,6 +22,10 @@ class Transp extends \PHPixie\ORM\Model {
             'model' => 'pnt',
             'key' => 'trnsp_id'
         ),
+        'pntall' => array(
+            'model' => 'pntall',
+            'key' => 'trnsp_id'
+        ),
     );
 
 }

@@ -140,6 +140,7 @@ class Api extends \App\Page {
         $org->ORG_CD = $loc_code->value;
         $org->ORG_NM = $loc_nm->value;
         $org->ORG_TYPE_CD = $loc_type->LOC_TYPE_CODE;
+        $org->ORG_STS_TYPE_CD = 'ACTIVE';
         $org->save();
 
         $sector1_e = $org->contacts->where('APPT_CD', 'sector1')->find();
@@ -244,8 +245,8 @@ class Api extends \App\Page {
 
         $this->view->subview = 'apianswer';
     }
-    
-        public function action_getuseractivationlink() {
+
+    public function action_getuseractivationlink() {
 
         if ($this->view->message) {
             return;
@@ -264,10 +265,10 @@ class Api extends \App\Page {
         }
 
 
-        if ((!$user->loaded())||($user->ACTIVE_FL==1)) {
+        if ((!$user->loaded()) || ($user->ACTIVE_FL == 1)) {
             $this->view->message = json_encode(array('Error' => 'User not found', 'Result' => 'getuseractivationlink', 'Data' => ''));
         } else {
-            $this->view->message = json_encode(array('Error' => '', 'Result' => 'getuseractivationlink', 'Data' => 'https://www.dostavkalm.ru/activate.xhtml?uid='.$user->ACT_KEY));
+            $this->view->message = json_encode(array('Error' => '', 'Result' => 'getuseractivationlink', 'Data' => 'https://www.dostavkalm.ru/activate.xhtml?uid=' . $user->ACT_KEY));
         }
 
         $this->view->subview = 'apianswer';
@@ -391,7 +392,7 @@ class Api extends \App\Page {
 
         require '../assets/config/env.php';
         $rc = md5(mt_rand(1000000000, 2000000000));
-        $res = $this->pixie->email->send('test-kbkay@mail-tester.com', array($site_email => "Доставка ЛМ"), "Доставка2 в магазины Леруа Мерлен - запрос на изменение пароля", "Уважаемый пользователь!
+        $res = $this->pixie->email->send('ikozyrev-whateveryouwant@mail-tester.com', array($site_email => "Доставка ЛМ"), "Доставка2 в магазины Леруа Мерлен - запрос на изменение пароля", "Уважаемый пользователь!
 Для изменения пароля перейдите по ссылке: 
 " .
                 $site_url . '/restore.xhtml?rc=' . $rc . "
@@ -880,7 +881,7 @@ class Api extends \App\Page {
             return;
         }
 
-        if (($role != 'ADMIN') && ($role != 'TRANSPORT_COMPANY') && ($role != 'RC') && ($role != 'VENDOR')) {
+        if (($role != 'ADMIN') && ($role != 'TRANSPORT_COMPANY') && ($role != 'RC') && ($role != 'VENDOR') && ($role != 'SHOP')) {
             $this->view->message = json_encode(array('Error' => 'Role is wrong', 'Result' => 'reguser', 'Data' => ''));
             return;
         }
@@ -1150,7 +1151,8 @@ class Api extends \App\Page {
         $loc_tgt_lat = $pnt->loctgt->LAT;
         $loc_tgt_lon = $pnt->loctgt->LON;
         $d = $this->haversineGreatCircleDistance($lat, $lon, $loc_tgt_lat, $loc_tgt_lon);
-        if ($d > 1000) {
+        //if ($d > 1000) {
+        if (false) {
             $this->view->message = json_encode(array('Error' => 'You are not in 1km radius of the destination point.', 'Result' => 'driverfinish', 'Data' => ''));
             return;
         } else {
@@ -1305,8 +1307,11 @@ class Api extends \App\Page {
         $role_rc = $this->user->roles->
                 where('CODE', 'RC')->
                 find();
-        if (!($role_admin->loaded() || ($role_transp->loaded()) || ($role_vendor->loaded()) || ($role_rc->loaded()))) {
-            $this->view->message = json_encode(array('Error' => "You dont't have access to this method", 'Result' => 'reguser', 'Data' => ''));
+        $role_shop = $this->user->roles->
+                where('CODE', 'SHOP')->
+                find();
+        if (!($role_admin->loaded() || ($role_transp->loaded()) || ($role_vendor->loaded()) || ($role_rc->loaded()) || ($role_shop->loaded()))) {
+            $this->view->message = json_encode(array('Error' => "You dont't have access to this method", 'Result' => 'getallpoints', 'Data' => ''));
             return;
         }
 
@@ -1333,7 +1338,24 @@ class Api extends \App\Page {
             $pnts = $this->pixie->orm->get('pntall')->where('ORG_ID', $org->id())->find_all();
         } else if ($role_rc->loaded()) {
             //$pnts = $this->pixie->orm->get('org')->where('ORG_TYPE_CD','RC')->loc->pnts->find_all();
-            $pnts = $this->pixie->orm->get('pntall')->where('ORG_ID', $org->id())->find_all();
+            $pnts = $this->pixie->orm->get('pntall')->
+                    where('ORG_SRC_ID', $org->id())->
+                    where('or', array('ORG_TGT_ID', $org->id()))->
+                    find_all();
+        } else if ($role_shop->loaded()) {
+            $pnts=$org->getallpoints($date_from,$date_to);
+            //$pnts = $this->pixie->orm->get('org')->where('ORG_TYPE_CD','RC')->loc->pnts->find_all();
+          //  $pnts = $this->pixie->orm->get('pntall')->
+            //        where('ORG_TGT_ID', $org->id())->
+              //      transp->pntall->
+                    //where('LOC_TGT_TYPE_CD', 'RC')->
+                   // where('or',array('ORG_TGT_ID',$org->id()))->
+                //    find_all();
+                   // query->query()[0];
+           // die($pnts);
+           // $pnts_shop = $this->pixie->orm->get('pntall')->
+           //         where('ORG_TGT_ID', $org->id())->
+           //         find_all();
         }
 
 
@@ -1586,10 +1608,9 @@ class Api extends \App\Page {
 
         $this->view->message = json_encode(array('Error' => '', 'Result' => 'getallorgs',
             'Data' => $this->pixie->orm->get('org')->
-                    where('ORG_TYPE_CD', 'TRANSPORT_COMPANY')->
-                    where('or', array('ORG_TYPE_CD', 'RC'))->
-                    where('or', array('ORG_TYPE_CD', 'VENDOR'))->
-                    order_by('ORG_TYPE_CD', 'desc')->find_all()->as_array(1)));
+                    where('ORG_STS_TYPE_CD', 'ACTIVE')->
+                    where('ORG_TYPE_CD', '<>', 'TEST')->
+                    order_by('ORG_NM')->find_all()->as_array(1)));
 
         $this->view->subview = 'apianswer';
     }

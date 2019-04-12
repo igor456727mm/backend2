@@ -57,6 +57,7 @@ class Pnt extends \PHPixie\ORM\Model {
             $pntStatus->TRNSP_PNT_STS_FROM = date("Y-m-d H:i:s");
             $pntStatus->TRNSP_PNT_STS_TYPE_CD = $status;
             $pntStatus->USER_ID = $user_id;
+            $pntStatus->STS_DTTM = $dttm->format('Y-m-d H:i:s');
             $pntStatus->TRNSP_PNT_ID = $this->id();
             $pntStatus->DISTANCE = $d;
             $pntStatus->save();
@@ -68,6 +69,7 @@ class Pnt extends \PHPixie\ORM\Model {
             $pntStatus->TRNSP_PNT_STS_TYPE_CD = $status;
             $pntStatus->DISTANCE = $d;
             $pntStatus->USER_ID = $user_id;
+            $pntStatus->STS_DTTM = $dttm->format('Y-m-d H:i:s');
             $pntStatus->TRNSP_PNT_ID = $this->id();
             $pntStatus->save();
         }
