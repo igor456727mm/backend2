@@ -1035,7 +1035,7 @@ class Api extends \App\Page {
 
     function action_prometheus() {
         $ret=$this->glr_curl("/apiopen/login", 'username=iko.zyrev@gmail.com&password=seliger9');
-        $this->view->message=check_action("login","/apiopen/login",'username=iko.zyrev@gmail.com&password=seliger9','token');
+        $this->view->message=$this->check_action("login","/apiopen/login",'username=iko.zyrev@gmail.com&password=seliger9','token');
         
         $this->view->subview = 'apianswer';
     }
