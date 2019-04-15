@@ -1023,7 +1023,7 @@ class Api extends \App\Page {
         $data = json_decode($ret);
         //echo '<pre>'.print_r($data,true).'</pre>'; die();
         if (!isset($data->token)) {
-            $this->view->message = 'grt_action_login 0';
+            $this->view->message = 'grt_action_login 0'.$data;
         } else {
             $this->view->message = 'grt_action_login 1';
         }
