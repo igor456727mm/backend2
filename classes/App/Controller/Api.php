@@ -1001,10 +1001,10 @@ class Api extends \App\Page {
                                 cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
         return $angle * $earthRadius;
     }
-
-    function action_prometheus() {
+    
+    function glr_curl($path, $param) {
         //connect to web service
-        $url = 'http://localhost/apiopen/login';
+        $url = 'http://localhost'.$path;
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_HEADER, false);
@@ -1012,21 +1012,31 @@ class Api extends \App\Page {
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
         curl_setopt($ch, CURLOPT_TIMEOUT, 10); //timeout in seconds
         curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, "username=iko.zyrev@gmail.com&password=seliger9");
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $param);
         $ret = curl_exec($ch);
         curl_close($ch);
+        return $ret;
+    }
+    
+    function check_action($action,$path,$param,$ret_param) {
+        $ret=$this->glr_curl($path, $param);
         if (!$ret) {
-            $this->view->message = 'grt_action_login -1';
+            $this->view->message = 'grt_action_'.$action.' -1';
         }
-
         //parse XML response
         $data = json_decode($ret);
         //echo '<pre>'.print_r($data,true).'</pre>'; die();
-        if (!isset($data->Data->token)) {
-            $this->view->message = 'grt_action_login 0';
+        if (!isset($data->Data[$ret_param])) {
+            $this->view->message = 'grt_action_'.$action.' 0';
         } else {
-            $this->view->message = 'grt_action_login 1';
+            $this->view->message = 'grt_action_'.$action.' 1';
         }
+    }
+
+    function action_prometheus() {
+        $ret=$this->glr_curl("/apiopen/login", 'username=iko.zyrev@gmail.com&password=seliger9');
+        $this->view->message=check_action("login","/apiopen/login",'username=iko.zyrev@gmail.com&password=seliger9','token');
+        
         $this->view->subview = 'apianswer';
     }
 
