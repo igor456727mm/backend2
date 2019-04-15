@@ -1002,6 +1002,34 @@ class Api extends \App\Page {
         return $angle * $earthRadius;
     }
 
+    function action_prometheus() {
+        //connect to web service
+        $url = 'http://localhost/apiopen/login';
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10); //timeout in seconds
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, "username=iko.zyrev@gmail.com&password=seliger9");
+        $ret = curl_exec($ch);
+        curl_close($ch);
+        if (!$ret) {
+            $this->view->message = 'grt_action_login 0';
+        }
+
+        //parse XML response
+        $data = json_decode($ret);
+        //echo '<pre>'.print_r($data,true).'</pre>'; die();
+        if (!isset($data->token)) {
+            $this->view->message = 'grt_action_login 0';
+        } else {
+            $this->view->message = 'grt_action_login 1';
+        }
+        $this->view->subview = 'apianswer';
+    }
+
     function get_timezone($latitude, $longitude, $username) {
 
         //error checking
@@ -1333,35 +1361,35 @@ class Api extends \App\Page {
                     where('LOC_PLAN_DTTM', '>=', $date_from)->
                     where('and', array('LOC_PLAN_DTTM', '<=', $date_to))->
                     find_all();
-           // $message=$this->pixie->orm->get('pntall')->
-           //         where('LOC_PLAN_DTTM', '>=', $date_from)->
-           //         where('and', array('LOC_PLAN_DTTM', '<=', $date_to))->
-           //         query->query()[0];
-           //$this->logerror('getallpoints', $message,'ERROR');
+            // $message=$this->pixie->orm->get('pntall')->
+            //         where('LOC_PLAN_DTTM', '>=', $date_from)->
+            //         where('and', array('LOC_PLAN_DTTM', '<=', $date_to))->
+            //         query->query()[0];
+            //$this->logerror('getallpoints', $message,'ERROR');
         } else if ($role_transp->loaded() || $role_vendor->loaded()) {
             //$pnts = $this->pixie->orm->get('transp')->where('ORG_ID', $org->id())->pnts->find_all();
             $pnts = $this->pixie->orm->get('pntall')->where('ORG_ID', $org->id())->find_all();
         } else if ($role_rc->loaded()) {
             //$pnts = $this->pixie->orm->get('org')->where('ORG_TYPE_CD','RC')->loc->pnts->find_all();
-           // $pnts = $this->pixie->orm->get('pntall')->
-           //         where('ORG_SRC_ID', $org->id())->
-           //         where('or', array('ORG_TGT_ID', $org->id()))->
-           //         find_all();
-            $pnts=$org->getallpoints($date_from,$date_to);
+            // $pnts = $this->pixie->orm->get('pntall')->
+            //         where('ORG_SRC_ID', $org->id())->
+            //         where('or', array('ORG_TGT_ID', $org->id()))->
+            //         find_all();
+            $pnts = $org->getallpoints($date_from, $date_to);
         } else if ($role_shop->loaded()) {
-            $pnts=$org->getallpoints($date_from,$date_to);
+            $pnts = $org->getallpoints($date_from, $date_to);
             //$pnts = $this->pixie->orm->get('org')->where('ORG_TYPE_CD','RC')->loc->pnts->find_all();
-          //  $pnts = $this->pixie->orm->get('pntall')->
+            //  $pnts = $this->pixie->orm->get('pntall')->
             //        where('ORG_TGT_ID', $org->id())->
-              //      transp->pntall->
-                    //where('LOC_TGT_TYPE_CD', 'RC')->
-                   // where('or',array('ORG_TGT_ID',$org->id()))->
-                //    find_all();
-                   // query->query()[0];
-           // die($pnts);
-           // $pnts_shop = $this->pixie->orm->get('pntall')->
-           //         where('ORG_TGT_ID', $org->id())->
-           //         find_all();
+            //      transp->pntall->
+            //where('LOC_TGT_TYPE_CD', 'RC')->
+            // where('or',array('ORG_TGT_ID',$org->id()))->
+            //    find_all();
+            // query->query()[0];
+            // die($pnts);
+            // $pnts_shop = $this->pixie->orm->get('pntall')->
+            //         where('ORG_TGT_ID', $org->id())->
+            //         find_all();
         }
 
 
