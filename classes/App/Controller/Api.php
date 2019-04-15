@@ -1022,8 +1022,8 @@ class Api extends \App\Page {
         //parse XML response
         $data = json_decode($ret);
         //echo '<pre>'.print_r($data,true).'</pre>'; die();
-        if (!isset($data->token)) {
-            $this->view->message = 'grt_action_login 0'.$data;
+        if (!isset($data->Data->token)) {
+            $this->view->message = 'grt_action_login 0';
         } else {
             $this->view->message = 'grt_action_login 1';
         }
