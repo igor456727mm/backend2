@@ -1026,7 +1026,7 @@ class Api extends \App\Page {
         //parse XML response
         $data = json_decode($ret);
         //echo '<pre>'.print_r($data,true).'</pre>'; die();
-        if (!isset($data->Data[$ret_param])) {
+        if (!isset($data->Data->$ret_param)) {
             $this->view->message = 'grt_action_'.$action.' 0';
         } else {
             $this->view->message = 'grt_action_'.$action.' 1';
