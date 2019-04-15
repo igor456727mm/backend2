@@ -1001,10 +1001,10 @@ class Api extends \App\Page {
                                 cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
         return $angle * $earthRadius;
     }
-    
+
     function glr_curl($path, $param) {
         //connect to web service
-        $url = 'http://localhost'.$path;
+        $url = 'http://localhost' . $path;
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_HEADER, false);
@@ -1017,27 +1017,36 @@ class Api extends \App\Page {
         curl_close($ch);
         return $ret;
     }
-    
-    function check_action($action,$path,$param,$ret_param) {
-        $ret=$this->glr_curl($path, $param);
+
+    function check_action($action, $path, $param, $ret_param, $is_array = false) {
+        $ret = $this->glr_curl($path, $param);
         if (!$ret) {
-            $res = 'grt_action_'.$action.' -1';
+            $res = 'grt_action_' . $action . ' -1';
         }
         //parse XML response
         $data = json_decode($ret);
         //echo '<pre>'.print_r($data,true).'</pre>'; die();
-        if (!isset($data->Data->$ret_param)) {
-            $res = 'grt_action_'.$action.' 0';
+        if ($is_array) {
+            if (!isset($data->Data[0]->$ret_param)) {
+                $res = 'grt_action_' . $action . ' 0';
+            } else {
+                $res = 'grt_action_' . $action . ' 1';
+            }
         } else {
-            $res = 'grt_action_'.$action.' 1';
+            if (!isset($data->Data->$ret_param)) {
+                $res = 'grt_action_' . $action . ' 0';
+            } else {
+                $res = 'grt_action_' . $action . ' 1';
+            }
         }
         return $res;
     }
 
     function action_prometheus() {
-        $ret=$this->glr_curl("/apiopen/login", 'username=iko.zyrev@gmail.com&password=seliger9');
-        $this->view->message=$this->check_action("login","/apiopen/login",'username=iko.zyrev@gmail.com&password=seliger9','token');
-        
+        $ret = $this->glr_curl("/apiopen/login", 'username=iko.zyrev@gmail.com&password=seliger9');
+        $this->view->message = $this->check_action("login", "/apiopen/login", 'username=iko.zyrev@gmail.com&password=seliger9', 'token');
+        $this->view->message = $this->view->message."
+".$this->check_action("getallpoints", "/api/getallpoints", 'token=8c61a3727246cf42299d6c523bbe819e', 'TU', true);
         $this->view->subview = 'apianswer';
     }
 
