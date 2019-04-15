@@ -1016,7 +1016,7 @@ class Api extends \App\Page {
         $ret = curl_exec($ch);
         curl_close($ch);
         if (!$ret) {
-            $this->view->message = 'grt_action_login 0';
+            $this->view->message = 'grt_action_login -1';
         }
 
         //parse XML response
