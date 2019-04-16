@@ -34,7 +34,10 @@ class Api extends \App\Page {
             return;
         }
 
-        $token = $this->pixie->orm->get('usertoken')->where('token', $this->token)->find();
+        $token = $this->pixie->orm->get('usertoken')->
+                where('token', $this->token)->
+                where('and',array('CREATED_DATE','>', $this->pixie->db->expr('now() -interval 1 hour')))->
+                find();
         if (!$token->loaded()) {
             $this->view->message = json_encode(array('Error' => 'Token is incorrect', 'Result' => '', 'Data' => ''));
             return;
