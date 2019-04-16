@@ -1049,7 +1049,7 @@ class Api extends \App\Page {
         $ret = $this->glr_curl("/apiopen/login", 'username=iko.zyrev@gmail.com&password=seliger9');
         $this->view->message = $this->check_action("login", "/apiopen/login", 'username=iko.zyrev@gmail.com&password=seliger9', 'token');
         $this->view->message = $this->view->message."
-".$this->check_action("getallpoints", "/api/getallpoints", 'token=8c61a3727246cf42299d6c523bbe819e&date_from=2019-03-22 01:00&date_to=2019-03-22 01:15', 'TU', true);
+".$this->check_action("getallpoints", "/api/getallpoints", 'token='.$ret->Data->token.'&date_from=2019-03-22 01:00&date_to=2019-03-22 01:15', 'TU', true);
         $this->view->subview = 'apianswer';
     }
 
