@@ -133,6 +133,8 @@ class Apiopen extends \App\Page {
     }
 
     public function action_login() {
+        
+        usleep(500);
 
         $this->view->subview = 'apianswer';
 
