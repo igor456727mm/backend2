@@ -36,7 +36,7 @@ class Api extends \App\Page {
 
         $token = $this->pixie->orm->get('usertoken')->
                 where('token', $this->token)->
-                where('and',array('CREATED_DATE','>', $this->pixie->db->expr('now() -interval 1 hour')))->
+                where('and', array('CREATED_DATE', '>', $this->pixie->db->expr('now() -interval 1 hour')))->
                 find();
         if (!$token->loaded()) {
             $this->view->message = json_encode(array('Error' => 'Token is incorrect', 'Result' => '', 'Data' => ''));
@@ -422,9 +422,9 @@ class Api extends \App\Page {
         $etlrun->loaded = 0;
         $etlrun->updated = 0;
         $etlrun->etl_run_dttm = date("Y-m-d H:i:s");
-        
+
         $datetime = new DateTime();
-        $this->logerror('addtransp', 'Addtransp started at:'.$datetime->format('Y-m-d H:i:s u'));
+        $this->logerror('addtransp', 'Addtransp started at:' . $datetime->format('Y-m-d H:i:s u'));
 
         $role = $this->user->roles->where('CODE', 'ADMIN')->find();
         if (!$role->loaded()) {
@@ -453,7 +453,11 @@ class Api extends \App\Page {
         $j = 0;
         $err_array = [];
 
+        $datetime = new DateTime();
+        $this->logerror('addtransp', 'For loop started:' . $datetime->format('Y-m-d H:i:s u'));
+
         foreach ($transps as $transp) {
+
             if (!isset($transp->tu)) {
                 $this->view->message = json_encode(array('Error' => 'TU must not be empty', 'Result' => 'addtransp', 'Data' => ''));
                 $transp->reason = 'TU не указан';
@@ -686,7 +690,11 @@ class Api extends \App\Page {
             } else {
                 $etlrun->updated = $etlrun->updated + 1;
             }
+            $datetime = new DateTime();
+            $this->logerror('addtransp', 'Point_e save started:' . $datetime->format('Y-m-d H:i:s u'));
             $pnt_e->save();
+            $datetime = new DateTime();
+            $this->logerror('addtransp', 'Point_e status set started:' . $datetime->format('Y-m-d H:i:s u'));
             $pnt_e->setstatus('CREATED', 0, $this->user->id());
 
             $pnt_s = $this->pixie->orm->get('transp')->
@@ -705,7 +713,11 @@ class Api extends \App\Page {
             } else {
                 $etlrun->updated = $etlrun->updated + 1;
             }
+            $datetime = new DateTime();
+            $this->logerror('addtransp', 'Point_s save started:' . $datetime->format('Y-m-d H:i:s u'));
             $pnt_s->save();
+            $datetime = new DateTime();
+            $this->logerror('addtransp', 'Point_s status set started:' . $datetime->format('Y-m-d H:i:s u'));
             $pnt_s->setstatus('CREATED', 0, $this->user->id());
             $i = $i + 1;
             //    $log = $this->pixie->orm->get('log');
@@ -716,6 +728,8 @@ class Api extends \App\Page {
             //     $log->level_cd = 'INFO';
 //echo    $log->message;     
             //   $log->save();
+            $datetime = new DateTime();
+            $this->logerror('addtransp', 'For loop ended:' . $datetime->format('Y-m-d H:i:s u'));
         }
 
 
@@ -1051,8 +1065,8 @@ class Api extends \App\Page {
         $ret = $this->glr_curl("/apiopen/login", 'username=iko.zyrev@gmail.com&password=seliger9');
         $data = json_decode($ret);
         $this->view->message = $this->check_action("login", "/apiopen/login", 'username=iko.zyrev@gmail.com&password=seliger9', 'token');
-        $this->view->message = $this->view->message."
-".$this->check_action("getallpoints", "/api/getallpoints", 'token='.$data->Data->token.'&date_from=2019-03-22 01:00&date_to=2019-03-22 01:15', 'TU', true);
+        $this->view->message = $this->view->message . "
+" . $this->check_action("getallpoints", "/api/getallpoints", 'token=' . $data->Data->token . '&date_from=2019-03-22 01:00&date_to=2019-03-22 01:15', 'TU', true);
         $this->view->subview = 'apianswer';
     }
 
