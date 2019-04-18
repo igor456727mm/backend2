@@ -422,7 +422,9 @@ class Api extends \App\Page {
         $etlrun->loaded = 0;
         $etlrun->updated = 0;
         $etlrun->etl_run_dttm = date("Y-m-d H:i:s");
-
+        
+        $datetime = new DateTime();
+        $this->logerror('addtransp', 'Addtransp started at:'.$datetime->format('Y-m-d H:i:s u'));
 
         $role = $this->user->roles->where('CODE', 'ADMIN')->find();
         if (!$role->loaded()) {
