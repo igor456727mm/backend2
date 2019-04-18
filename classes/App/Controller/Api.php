@@ -640,6 +640,8 @@ class Api extends \App\Page {
                     where('LOC_NM', $to)->
                     where('and', array('LOC_STS_TYPE_CD', '<>', 'DELETED'))->
                     find();
+            $datetime = new DateTime();
+            $this->logerror('addtransp', 'Shop have not found started:' . $datetime->format('Y-m-d H:i:s u'));
 
             if (!$to_e->loaded()) {
 
