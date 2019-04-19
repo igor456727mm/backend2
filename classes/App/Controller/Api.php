@@ -62,8 +62,8 @@ class Api extends \App\Page {
             return;
         }
         $payload = [
-            'resource' => array('dashboard'=> 68 ),
-            'params' => array('id'=> 0 )
+            'resource' => ['dashboard'=> 68 ],
+            'params' => ['id'=> 0 ]
         ];
         $secret = '3cf6553218a113836bb700289e6fd3bc7bbe1b5b871801a7f316d2df4f21620f';
         $token = Token::customPayload($payload, $secret);
