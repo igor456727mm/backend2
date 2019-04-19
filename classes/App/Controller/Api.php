@@ -62,12 +62,10 @@ class Api extends \App\Page {
             return;
         }
         $payload = [
-            'iat' => time(),
-            'uid' => 1,
-            'exp' => time() + 10,
-            'iss' => 'localhost'
+            'resource' => array('dashboard'=> 68 ),
+            'params' => array('id'=> 0 )
         ];
-        $secret = 'Hello&MikeFooBar123';
+        $secret = '3cf6553218a113836bb700289e6fd3bc7bbe1b5b871801a7f316d2df4f21620f';
         $token = Token::customPayload($payload, $secret);
         $this->view->message = json_encode(array('Error' => '', 'Result' => 'jwttoken', 'Data' => $token));
         $this->view->subview = 'apianswer';
