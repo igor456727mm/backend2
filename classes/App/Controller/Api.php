@@ -408,6 +408,10 @@ class Api extends \App\Page {
         return;
     }
 
+    public function action_addtransp1() {
+        
+    }
+
     public function action_addtransp() {
 
         if ($this->view->message) {
