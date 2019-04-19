@@ -4,6 +4,7 @@ namespace app\controller;
 
 use DateTime;
 use DateTimeZone;
+use ReallySimpleJWT\Token;
 
 if (!defined('API'))
     define('API', '1');
@@ -54,6 +55,22 @@ class Api extends \App\Page {
                 return;
             }
         }
+    }
+
+    public function action_jwttoken() {
+        if ($this->view->message) {
+            return;
+        }
+        $payload = [
+            'iat' => time(),
+            'uid' => 1,
+            'exp' => time() + 10,
+            'iss' => 'localhost'
+        ];
+        $secret = 'Hello&MikeFooBar123';
+        $token = Token::customPayload($payload, $secret);
+        $this->view->message = json_encode(array('Error' => '', 'Result' => 'jwttoken', 'Data' => $token));
+        $this->view->subview = 'apianswer';
     }
 
     public function action_addloc() {
