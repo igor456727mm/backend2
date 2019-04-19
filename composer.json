@@ -14,7 +14,8 @@
     "phpixie/email":"2.*@dev",
     "zircote/swagger-php": "^2.0",
     "denpa/php-bitcoinrpc": "^2.0",
-    "phpgangsta/googleauthenticator": "dev-master"
+    "phpgangsta/googleauthenticator": "dev-master",
+    "rbdwllr/reallysimplejwt": "^2.0"
   },
   "extra": {
     "branch-alias": {
