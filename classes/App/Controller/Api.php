@@ -61,14 +61,11 @@ class Api extends \App\Page {
         if ($this->view->message) {
             return;
         }
-        $org = $this->check_field('org_id', 'org', 'ORG_ID', true, false);
-        if (!is_object($org)) {
-            $this->view->message = json_encode(array('Error' => $org, 'Result' => 'jwttoken', 'Data' => ''));
-            return;
-        }
+        $org_id = $this->user->org->id();
+        $dashboard_id = $this->user->org->orgtype->dashboard_id;
         $payload = [
-            'resource' => ['dashboard' => 68],
-            'params' => ["ид_тк" => $org->id()]
+            'resource' => ['dashboard' => $dashboard_id],
+            'params' => ["ид_тк" => $org_id]
         ];
         $secret = '3cf6553218a113836bb700289e6fd3bc7bbe1b5b871801a7f316d2df4f21620f';
         $token = Token::customPayload($payload, $secret);
