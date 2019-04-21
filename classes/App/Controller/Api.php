@@ -63,7 +63,7 @@ class Api extends \App\Page {
         }
         $org_id = $this->user->org->id();
         $dashboard_id = $this->user->org->orgtype->dashboard_id;
-        if ($this->user->org->orgtype == 'HEAD') {
+        if ($this->user->org->orgtype->id() == 'HEAD') {
             $payload = [
                 'resource' => ["dashboard" => 69],
                 'params' => (Object) []
