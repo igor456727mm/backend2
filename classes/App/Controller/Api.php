@@ -1669,18 +1669,18 @@ class Api extends \App\Page {
             return;
         }
 
-        $org = $this->user->org;
+       // $org = $this->user->org;
 
-        if (!$org->loaded()) {
+       // if (!$org->loaded()) {
             $roles = $this->pixie->orm->get('role')->
                     where('PARENT_CODE', 'ADMINLERUA')->
                     where('or', array('PARENT_CODE', 'TRANSPORT_COMPANY'))->
                     find_all();
-        } else {
-            $roles = $this->pixie->orm->get('role')->
-                    where('PARENT_CODE', 'TRANSPORT_COMPANY')->
-                    find_all();
-        }
+       // } else {
+       //     $roles = $this->pixie->orm->get('role')->
+       //             where('PARENT_CODE', 'TRANSPORT_COMPANY')->
+       //             find_all();
+       // }
 
         $this->view->message = json_encode(array('Error' => '', 'Result' => 'getallroles', 'Data' => $roles->as_array(1)));
 
