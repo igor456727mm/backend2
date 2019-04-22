@@ -63,23 +63,24 @@ class Api extends \App\Page {
         }
         $org_id = $this->user->org->id();
         $dashboard_id = $this->user->org->orgtype->dashboard_id;
-        $org=$this->user->org->find();
+        //$org=$this->user->org->find();
+       // die($dashboard_id);
         
-        die($this->user->org->find()->org_type_cd);
-        if ($this->user->org->find()->orgtype->id() == 'HEAD') {
+        
+        if ($this->user->org->ORG_TYPE_CD == 'HEAD') {
             $payload = [
-                'resource' => ["dashboard" => 69],
+                'resource' => ["dashboard" => intval($dashboard_id)],
                 'params' => (Object) []
             ];
         } else {
             $payload = [
-                'resource' => ["dashboard" => 68],
+                'resource' => ["dashboard" => intval($dashboard_id)],
                 'params' => ["ид_тк" => intval($org_id)]
             ];
         }
         $secret = '3cf6553218a113836bb700289e6fd3bc7bbe1b5b871801a7f316d2df4f21620f';
         $token = Token::customPayload($payload, $secret);
-        $this->view->message = json_encode(array('Error' => '', 'Result' => 'jwttoken', 'Data' => $token));
+        $this->view->message = json_encode(array('Error' => '', 'Result' => 'jwttoken', 'Data' => "https://analytics.dostavkalm.ru:8443/embed/dashboard/".$token));
         $this->view->subview = 'apianswer';
     }
 
