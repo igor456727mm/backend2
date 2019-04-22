@@ -63,6 +63,7 @@ class Api extends \App\Page {
         }
         $org_id = $this->user->org->id();
         $dashboard_id = $this->user->org->orgtype->dashboard_id;
+        die($this->user->org->orgtype->find()->id());
         if ($this->user->org->orgtype->find()->id() == 'HEAD') {
             $payload = [
                 'resource' => ["dashboard" => 69],
@@ -452,7 +453,7 @@ class Api extends \App\Page {
         $etlrun->etl_run_dttm = date("Y-m-d H:i:s");
 
         $datetime = new DateTime();
-        $this->logerror('addtransp', 'Addtransp started at:' . $datetime->format('Y-m-d H:i:s u'));
+        //    $this->logerror('addtransp', 'Addtransp started at:' . $datetime->format('Y-m-d H:i:s u'));
 
         $role = $this->user->roles->where('CODE', 'ADMIN')->find();
         if (!$role->loaded()) {
@@ -482,7 +483,7 @@ class Api extends \App\Page {
         $err_array = [];
 
         $datetime = new DateTime();
-        $this->logerror('addtransp', 'For loop started:' . $datetime->format('Y-m-d H:i:s u'));
+        //  $this->logerror('addtransp', 'For loop started:' . $datetime->format('Y-m-d H:i:s u'));
 
         foreach ($transps as $transp) {
 
@@ -669,7 +670,7 @@ class Api extends \App\Page {
                     where('and', array('LOC_STS_TYPE_CD', '<>', 'DELETED'))->
                     find();
             $datetime = new DateTime();
-            $this->logerror('addtransp', 'Shop have not found started:' . $datetime->format('Y-m-d H:i:s u'));
+            //       $this->logerror('addtransp', 'Shop have not found started:' . $datetime->format('Y-m-d H:i:s u'));
 
             if (!$to_e->loaded()) {
 
@@ -724,7 +725,7 @@ class Api extends \App\Page {
             $this->logerror('addtransp', 'Point_e save started:' . $datetime->format('Y-m-d H:i:s u'));
             $pnt_e->save();
             $datetime = new DateTime();
-            $this->logerror('addtransp', 'Point_e status set started:' . $datetime->format('Y-m-d H:i:s u'));
+            //  $this->logerror('addtransp', 'Point_e status set started:' . $datetime->format('Y-m-d H:i:s u'));
             $pnt_e->setstatus('CREATED', 0, $this->user->id());
 
             $pnt_s = $this->pixie->orm->get('transp')->
@@ -744,10 +745,10 @@ class Api extends \App\Page {
                 $etlrun->updated = $etlrun->updated + 1;
             }
             $datetime = new DateTime();
-            $this->logerror('addtransp', 'Point_s save started:' . $datetime->format('Y-m-d H:i:s u'));
+            //    $this->logerror('addtransp', 'Point_s save started:' . $datetime->format('Y-m-d H:i:s u'));
             $pnt_s->save();
             $datetime = new DateTime();
-            $this->logerror('addtransp', 'Point_s status set started:' . $datetime->format('Y-m-d H:i:s u'));
+            //    $this->logerror('addtransp', 'Point_s status set started:' . $datetime->format('Y-m-d H:i:s u'));
             $pnt_s->setstatus('CREATED', 0, $this->user->id());
             $i = $i + 1;
             //    $log = $this->pixie->orm->get('log');
@@ -759,7 +760,7 @@ class Api extends \App\Page {
 //echo    $log->message;     
             //   $log->save();
             $datetime = new DateTime();
-            $this->logerror('addtransp', 'For loop ended:' . $datetime->format('Y-m-d H:i:s u'));
+            //        $this->logerror('addtransp', 'For loop ended:' . $datetime->format('Y-m-d H:i:s u'));
         }
 
 
@@ -1176,6 +1177,54 @@ class Api extends \App\Page {
             return $ret;
         }
         return 'unknown';
+    }
+
+    public function action_driverrelease() {
+
+        if ($this->view->message) {
+            return;
+        }
+        date_default_timezone_set('Europe/Moscow');
+
+        $pnt_id = $this->request->post('pnt_id');
+        $pnt_id = filter_var($pnt_id, FILTER_SANITIZE_STRING);
+        if (!is_numeric($pnt_id)) {
+            $this->view->message = json_encode(array('Error' => 'Point id is wrong.', 'Result' => 'driverrelease', 'Data' => ''));
+            return;
+        }
+        $pnt = $this->pixie->orm->get('pnt')->
+                where("TRNSP_PNT_ID", $pnt_id)->
+                where("and", array("TRNSP_PNT_STS_TYPE_CD", "DELIVERED"))->
+                find();
+        if (!$pnt->loaded()) {
+            $this->view->message = json_encode(array('Error' => 'Point is not found.', 'Result' => 'driverrelease', 'Data' => ''));
+            return;
+        }
+
+        $role = $this->user->roles->where('CODE', 'SHOP')->find();
+        
+        if (!$role->loaded()) {
+            $this->view->message = json_encode(array('Error' => 'You dont have access to this method.', 'Result' => 'driverrelease', 'Data' => ''));
+            return;
+        }
+
+
+        $lat = $pnt->loctgt->LAT;
+        $lon = $pnt->loctgt->LON;
+        //$timezone = $this->get_nearest_timezone($lat, $lon, 'RU');
+        $timezone_id = $this->get_timezone($lat, $lon, 'glarus_digital');
+        if (isset(json_decode($timezone_id)->Error)) {
+            $this->view->message = json_encode(array('Error' => 'Timezone is not recognized:' . json_decode($timezone_id)->Error, 'Result' => 'driverrelease', 'Data' => ''));
+            return;
+        }
+        $timezone = new DateTimeZone($timezone_id);
+
+
+
+        $pnt->setstatus('RELEASED', 0, $this->user->id(), $timezone, null);
+        $this->view->message = json_encode(array('Error' => '', 'Result' => 'driverrelease', 'Data' => $pnt->REL_STS_DTTM));
+
+        $this->view->subview = 'apianswer';
     }
 
     public function action_driverfinish() {
