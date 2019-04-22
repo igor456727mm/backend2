@@ -1356,13 +1356,13 @@ class Api extends \App\Page {
             return;
         }
 
-        $org = $this->user->org;
+      //  $org = $this->user->org;
 
-        if (!$org->loaded()) {
+      //  if (!$org->loaded()) {
             $users = $this->pixie->orm->get('user')->where('NAME', '<>', 'driver')->find_all();
-        } else {
-            $users = $this->pixie->orm->get('user')->where('ORG_ID', $org->id())->where('and', array('NAME', '<>', 'driver'))->find_all();
-        }
+      //  } else {
+      //      $users = $this->pixie->orm->get('user')->where('ORG_ID', $org->id())->where('and', array('NAME', '<>', 'driver'))->find_all();
+      //  }
 
         $res = [];
         $i = 0;

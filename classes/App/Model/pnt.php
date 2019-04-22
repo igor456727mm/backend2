@@ -39,16 +39,20 @@ class Pnt extends \PHPixie\ORM\Model {
     public function setstatus($status, $d, $user_id, $timezone = null, $dttm = null) {
         $this->TRNSP_PNT_STS_TYPE_CD = $status;
         if ($dttm == null) {
-             $dttm= date("Y-m-d H:i:s");
+            $dttm = date("Y-m-d H:i:s");
         }
         $dttm = new DateTime($dttm);
-        
+
         if (is_object($timezone)) {
             $dttm->setTimezone($timezone);
             $this->STS_TIMEZONE = $timezone->getName();
         }
-        $this->STS_DTTM=$dttm->format('Y-m-d H:i:s');
-        
+        if ($status == 'RELEASED') {
+            $this->REL_STS_DTTM = $dttm->format('Y-m-d H:i:s');
+        } else {
+             $this->STS_DTTM = $dttm->format('Y-m-d H:i:s');
+        }
+
         $this->save();
         $pntStatus = $this->stshis->
                         where('TRNSP_PNT_STS_TO', 'is', $this->pixie->db->expr('NULL'))->find();
