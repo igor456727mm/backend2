@@ -34,7 +34,43 @@ class Pnt extends \PHPixie\ORM\Model {
             'model' => 'pntstshis',
             'key' => 'TRNSP_PNT_ID'
         ),
+        'markhis' => array(
+            'model' => 'pntmarkhis',
+            'key' => 'TRNSP_PNT_ID'
+        ),
     );
+
+    public function setmark($claim_type_cd, $shop_mark, $shop_comment, $user_id) {
+        $this->CLAIM_TYPE_CD = $claim_type_cd;
+        $this->SHOP_MARK = $shop_mark;
+        $this->SHOP_COMMENT = $shop_comment;
+        $this->SHOP_MARK_USER_ID = $user_id;
+        $this->save();
+
+        $pntMark = $this->markhis->
+                        where('TRNSP_PNT_MARK_TO', 'is', $this->pixie->db->expr('NULL'))->find();
+        if (!$pntMark->loaded()) {
+            $pntMark = $this->pixie->orm->get('pntmarkhis');
+            $pntMark->TRNSP_PNT_MARK_FROM = date("Y-m-d H:i:s");
+            $pntMark->CLAIM_TYPE_CD = $claim_type_cd;
+            $pntMark->SHOP_MARK = $shop_mark;
+            $pntMark->SHOP_COMMENT = $shop_comment;
+            $pntMark->USER_ID = $user_id;
+            $pntMark->TRNSP_PNT_ID = $this->id();
+            $pntMark->save();
+        } else {
+            $pntMark->TRNSP_PNT_MARK_TO = date("Y-m-d H:i:s");
+            $pntMark->save();
+            $pntMark = $this->pixie->orm->get('pntmarkhis');
+            $pntMark->TRNSP_PNT_MARK_FROM = date("Y-m-d H:i:s");
+            $pntMark->CLAIM_TYPE_CD = $claim_type_cd;
+            $pntMark->SHOP_MARK = $shop_mark;
+            $pntMark->SHOP_COMMENT = $shop_comment;
+            $pntMark->USER_ID = $user_id;
+            $pntMark->TRNSP_PNT_ID = $this->id();
+            $pntMark->save();
+        }
+    }
 
     public function setstatus($status, $d, $user_id, $timezone = null, $dttm = null) {
         $this->TRNSP_PNT_STS_TYPE_CD = $status;
@@ -50,7 +86,7 @@ class Pnt extends \PHPixie\ORM\Model {
         if ($status == 'RELEASED') {
             $this->REL_STS_DTTM = $dttm->format('Y-m-d H:i:s');
         } else {
-             $this->STS_DTTM = $dttm->format('Y-m-d H:i:s');
+            $this->STS_DTTM = $dttm->format('Y-m-d H:i:s');
         }
 
         $this->save();

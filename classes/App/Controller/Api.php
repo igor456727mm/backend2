@@ -64,9 +64,9 @@ class Api extends \App\Page {
         $org_id = $this->user->org->id();
         $dashboard_id = $this->user->org->orgtype->dashboard_id;
         //$org=$this->user->org->find();
-       // die($dashboard_id);
-        
-        
+        // die($dashboard_id);
+
+
         if ($this->user->org->ORG_TYPE_CD == 'HEAD') {
             $payload = [
                 'resource' => ["dashboard" => intval($dashboard_id)],
@@ -80,7 +80,7 @@ class Api extends \App\Page {
         }
         $secret = '3cf6553218a113836bb700289e6fd3bc7bbe1b5b871801a7f316d2df4f21620f';
         $token = Token::customPayload($payload, $secret);
-        $this->view->message = json_encode(array('Error' => '', 'Result' => 'jwttoken', 'Data' => "https://analytics.dostavkalm.ru:8443/embed/dashboard/".$token));
+        $this->view->message = json_encode(array('Error' => '', 'Result' => 'jwttoken', 'Data' => "https://analytics.dostavkalm.ru:8443/embed/dashboard/" . $token));
         $this->view->subview = 'apianswer';
     }
 
@@ -339,12 +339,18 @@ class Api extends \App\Page {
         $this->view->subview = 'apianswer';
     }
 
-    private function check_field($input, $entity, $field, $need_entity = true, $need_exist = true, $need_value = true) {
+    private function check_field($input, $entity, $field, $need_entity = true, $need_exist = true, $need_value = true, $type = false) {
         $val = $this->request->post($input);
         $val = filter_var($val, FILTER_SANITIZE_STRING);
         if ($need_value) {
             if ($val == '') {
                 return $input . ' must not be empty';
+            }
+        }
+
+        if ($type == 'int') {
+            if (!is_numeric($val)) {
+                return $input . ' must be integer';
             }
         }
 
@@ -1195,7 +1201,7 @@ class Api extends \App\Page {
             $this->view->message = json_encode(array('Error' => 'Point id is wrong.', 'Result' => 'driverrelease', 'Data' => ''));
             return;
         }
-        $pnt = $this->pixie->orm->get('pnt')->
+        $pnt = $this->user->org->loc->pnts->
                 where("TRNSP_PNT_ID", $pnt_id)->
                 where("and", array("TRNSP_PNT_STS_TYPE_CD", "DELIVERED"))->
                 find();
@@ -1204,8 +1210,32 @@ class Api extends \App\Page {
             return;
         }
 
+        $claim_type = $this->check_field('claim_type_cd', 'claimtype', 'CLAIM_TYPE_CD');
+        if (!is_object($claim_type)) {
+            $this->view->message = json_encode(array('Error' => $claim_type, 'Result' => 'driverrelease', 'Data' => ''));
+            return;
+        }
+
+        $shop_mark = $this->check_field('shop_mark', '', '', false, false, true, 'int');
+        if (!is_object($shop_mark)) {
+            $this->view->message = json_encode(array('Error' => $shop_mark, 'Result' => 'driverrelease', 'Data' => ''));
+            return;
+        }
+
+        $shop_comment = $this->check_field('shop_comment', '', '', false, false, false, false);
+        if (!is_object($shop_comment)) {
+            $this->view->message = json_encode(array('Error' => $shop_comment, 'Result' => 'driverrelease', 'Data' => ''));
+            return;
+        }
+        if (strlen($shop_comment->value)>4000) {
+           $this->view->message = json_encode(array('Error' => 'Comment is too long', 'Result' => 'driverrelease', 'Data' => ''));
+            return; 
+        }
+
+
+
         $role = $this->user->roles->where('CODE', 'SHOP')->find();
-        
+
         if (!$role->loaded()) {
             $this->view->message = json_encode(array('Error' => 'You dont have access to this method.', 'Result' => 'driverrelease', 'Data' => ''));
             return;
@@ -1222,9 +1252,11 @@ class Api extends \App\Page {
         }
         $timezone = new DateTimeZone($timezone_id);
 
-
-
+        $pnt->setmark($claim_type->CLAIM_TYPE_CD,$shop_mark->value, $shop_comment->value, $this->user->id());
         $pnt->setstatus('RELEASED', 0, $this->user->id(), $timezone, null);
+        
+        
+        
         $this->view->message = json_encode(array('Error' => '', 'Result' => 'driverrelease', 'Data' => $pnt->REL_STS_DTTM));
 
         $this->view->subview = 'apianswer';
@@ -1356,13 +1388,12 @@ class Api extends \App\Page {
             return;
         }
 
-      //  $org = $this->user->org;
-
-      //  if (!$org->loaded()) {
-            $users = $this->pixie->orm->get('user')->where('NAME', '<>', 'driver')->find_all();
-      //  } else {
-      //      $users = $this->pixie->orm->get('user')->where('ORG_ID', $org->id())->where('and', array('NAME', '<>', 'driver'))->find_all();
-      //  }
+        //  $org = $this->user->org;
+        //  if (!$org->loaded()) {
+        $users = $this->pixie->orm->get('user')->where('NAME', '<>', 'driver')->find_all();
+        //  } else {
+        //      $users = $this->pixie->orm->get('user')->where('ORG_ID', $org->id())->where('and', array('NAME', '<>', 'driver'))->find_all();
+        //  }
 
         $res = [];
         $i = 0;
@@ -1669,18 +1700,17 @@ class Api extends \App\Page {
             return;
         }
 
-       // $org = $this->user->org;
-
-       // if (!$org->loaded()) {
-            $roles = $this->pixie->orm->get('role')->
-                    where('PARENT_CODE', 'ADMINLERUA')->
-                    where('or', array('PARENT_CODE', 'TRANSPORT_COMPANY'))->
-                    find_all();
-       // } else {
-       //     $roles = $this->pixie->orm->get('role')->
-       //             where('PARENT_CODE', 'TRANSPORT_COMPANY')->
-       //             find_all();
-       // }
+        // $org = $this->user->org;
+        // if (!$org->loaded()) {
+        $roles = $this->pixie->orm->get('role')->
+                where('PARENT_CODE', 'ADMINLERUA')->
+                where('or', array('PARENT_CODE', 'TRANSPORT_COMPANY'))->
+                find_all();
+        // } else {
+        //     $roles = $this->pixie->orm->get('role')->
+        //             where('PARENT_CODE', 'TRANSPORT_COMPANY')->
+        //             find_all();
+        // }
 
         $this->view->message = json_encode(array('Error' => '', 'Result' => 'getallroles', 'Data' => $roles->as_array(1)));
 
