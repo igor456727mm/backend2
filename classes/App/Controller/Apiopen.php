@@ -141,11 +141,13 @@ class Apiopen extends \App\Page {
         if ($this->request->method == 'POST') {
             $login = $this->request->post('username');
             $password = $this->request->post('password');
+            $ip=$this->request->post('ip');
         }
 
         if ($this->request->method == 'GET') {
             $login = $this->request->param('username');
             $password = $this->request->param('password');
+            $ip=$this->request->param('ip');
         }
 
         if (($login == '') || ($password == '')) {
@@ -191,6 +193,7 @@ class Apiopen extends \App\Page {
             $usertoken = $this->pixie->orm->get('Usertoken');
             $usertoken->TOKEN = md5(mt_rand(1000000000, 2000000000));
             $usertoken->USER_ID = $this->pixie->auth->user()->id();
+            $usertoken->ip=$ip;
             $usertoken->save();
             if ($transp->loaded()) {
                 $transp->USER_TOKEN = $usertoken->TOKEN;

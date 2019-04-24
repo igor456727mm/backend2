@@ -1227,9 +1227,9 @@ class Api extends \App\Page {
             $this->view->message = json_encode(array('Error' => $shop_comment, 'Result' => 'driverrelease', 'Data' => ''));
             return;
         }
-        if (strlen($shop_comment->value)>4000) {
-           $this->view->message = json_encode(array('Error' => 'Comment is too long', 'Result' => 'driverrelease', 'Data' => ''));
-            return; 
+        if (strlen($shop_comment->value) > 4000) {
+            $this->view->message = json_encode(array('Error' => 'Comment is too long', 'Result' => 'driverrelease', 'Data' => ''));
+            return;
         }
 
 
@@ -1252,11 +1252,11 @@ class Api extends \App\Page {
         }
         $timezone = new DateTimeZone($timezone_id);
 
-        $pnt->setmark($claim_type->CLAIM_TYPE_CD,$shop_mark->value, $shop_comment->value, $this->user->id());
+        $pnt->setmark($claim_type->CLAIM_TYPE_CD, $shop_mark->value, $shop_comment->value, $this->user->id());
         $pnt->setstatus('RELEASED', 0, $this->user->id(), $timezone, null);
-        
-        
-        
+
+
+
         $this->view->message = json_encode(array('Error' => '', 'Result' => 'driverrelease', 'Data' => $pnt->REL_STS_DTTM));
 
         $this->view->subview = 'apianswer';
@@ -1684,6 +1684,35 @@ class Api extends \App\Page {
         $logs = $this->pixie->orm->get('log')->order_by('created_dttm', 'desc')->limit($amt->value)->find_all();
 
         $this->view->message = json_encode(array('Error' => '', 'Result' => 'getuserlogs', 'Data' => $logs->as_array(1)));
+
+        $this->view->subview = 'apianswer';
+    }
+
+    public function action_getclaimtypes() {
+
+        if ($this->view->message) {
+            return;
+        }
+
+        $role = $this->user->roles->where('CODE', 'ADMIN')->find();
+        if (!$role->loaded()) {
+            $this->view->message = json_encode(array('Error' => "You dont't have access to this method", 'Result' => 'getallroles', 'Data' => ''));
+            return;
+        }
+
+        // $org = $this->user->org;
+        // if (!$org->loaded()) {
+        $roles = $this->pixie->orm->get('role')->
+                where('PARENT_CODE', 'ADMINLERUA')->
+                where('or', array('PARENT_CODE', 'TRANSPORT_COMPANY'))->
+                find_all();
+        // } else {
+        //     $roles = $this->pixie->orm->get('role')->
+        //             where('PARENT_CODE', 'TRANSPORT_COMPANY')->
+        //             find_all();
+        // }
+
+        $this->view->message = json_encode(array('Error' => '', 'Result' => 'getallroles', 'Data' => $roles->as_array(1)));
 
         $this->view->subview = 'apianswer';
     }
