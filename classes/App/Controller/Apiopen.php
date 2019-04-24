@@ -195,6 +195,7 @@ class Apiopen extends \App\Page {
             $usertoken->TOKEN = md5(mt_rand(1000000000, 2000000000));
             $usertoken->USER_ID = $this->pixie->auth->user()->id();
             $usertoken->ip=$ip;
+         //   $usertoken->user_agent=$user_agent;
             $usertoken->save();
             if ($transp->loaded()) {
                 $transp->USER_TOKEN = $usertoken->TOKEN;

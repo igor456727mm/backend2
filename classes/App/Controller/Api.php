@@ -1102,7 +1102,7 @@ class Api extends \App\Page {
     }
 
     function action_prometheus() {
-        $ret = $this->glr_curl("/apiopen/login", 'username=iko.zyrev@gmail.com&password=seliger9');
+        $ret = $this->glr_curl("/apiopen/login", 'username=iko.zyrev@gmail.com&password=seliger9&ip='.$ip);
         $data = json_decode($ret);
         $ip=$_SERVER['HTTP_HOST'];
         $this->view->message = $this->check_action("login", "/apiopen/login", 'username=iko.zyrev@gmail.com&password=seliger9&ip='.$ip, 'token');
