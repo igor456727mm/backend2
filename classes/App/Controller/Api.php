@@ -1104,7 +1104,8 @@ class Api extends \App\Page {
     function action_prometheus() {
         $ret = $this->glr_curl("/apiopen/login", 'username=iko.zyrev@gmail.com&password=seliger9');
         $data = json_decode($ret);
-        $this->view->message = $this->check_action("login", "/apiopen/login", 'username=iko.zyrev@gmail.com&password=seliger9', 'token');
+        $ip=$_SERVER['HTTP_HOST'];
+        $this->view->message = $this->check_action("login", "/apiopen/login", 'username=iko.zyrev@gmail.com&password=seliger9&ip='.$ip, 'token');
         $this->view->message = $this->view->message . "
 " . $this->check_action("getallpoints", "/api/getallpoints", 'token=' . $data->Data->token . '&date_from=2019-03-22 01:00&date_to=2019-03-22 01:15', 'TU', true);
         $this->view->subview = 'apianswer';
@@ -1694,17 +1695,17 @@ class Api extends \App\Page {
             return;
         }
 
-        $role = $this->user->roles->where('CODE', 'ADMIN')->find();
-        if (!$role->loaded()) {
-            $this->view->message = json_encode(array('Error' => "You dont't have access to this method", 'Result' => 'getallroles', 'Data' => ''));
+        $role_shop = $this->user->roles->where('CODE', 'SHOP')->find();
+        $role_admin = $this->user->roles->where('CODE', 'ADMIN')->find();
+        
+        if (!($role_shop->loaded()||$role_admin->loaded())) {
+            $this->view->message = json_encode(array('Error' => "You dont't have access to this method", 'Result' => 'getclaimtypes', 'Data' => ''));
             return;
         }
 
         // $org = $this->user->org;
         // if (!$org->loaded()) {
-        $roles = $this->pixie->orm->get('role')->
-                where('PARENT_CODE', 'ADMINLERUA')->
-                where('or', array('PARENT_CODE', 'TRANSPORT_COMPANY'))->
+        $claimtypes = $this->pixie->orm->get('claimtype')->
                 find_all();
         // } else {
         //     $roles = $this->pixie->orm->get('role')->
@@ -1712,7 +1713,7 @@ class Api extends \App\Page {
         //             find_all();
         // }
 
-        $this->view->message = json_encode(array('Error' => '', 'Result' => 'getallroles', 'Data' => $roles->as_array(1)));
+        $this->view->message = json_encode(array('Error' => '', 'Result' => 'getclaimtypes', 'Data' => $claimtypes->as_array(1)));
 
         $this->view->subview = 'apianswer';
     }

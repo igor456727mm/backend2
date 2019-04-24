@@ -142,6 +142,7 @@ class Apiopen extends \App\Page {
             $login = $this->request->post('username');
             $password = $this->request->post('password');
             $ip=$this->request->post('ip');
+            $user_agent=$this->request->post('user_agent');
         }
 
         if ($this->request->method == 'GET') {
