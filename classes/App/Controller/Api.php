@@ -1599,6 +1599,7 @@ class Api extends \App\Page {
              */
             $rec['TU'] = $pnt->TU;
             $rec['FULL_NM'] = $pnt->FULL_NM;
+            $rec['DRIVER_PHONE']='';
             $rec['TRNSP_PNT_ID'] = $pnt->TRNSP_PNT_ID;
             $rec['LOC_PLAN_DTTM'] = $pnt->LOC_PLAN_DTTM;
             $rec['TRNSP_PNT_STS_TYPE_CD'] = $pnt->TRNSP_PNT_STS_TYPE_NM;
