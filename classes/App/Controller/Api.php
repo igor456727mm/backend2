@@ -512,7 +512,7 @@ class Api extends \App\Page {
                 $j = $j + 1;
                 continue;
             }
-            
+
             if (!isset($transp->phone)) {
                 $this->view->message = json_encode(array('Error' => 'Phone must not be empty', 'Result' => 'addtransp', 'Data' => ''));
                 $transp->reason = 'Телефон не указан';
@@ -522,7 +522,7 @@ class Api extends \App\Page {
             }
             $phone = $transp->phone;
             $phone = filter_var($phone, FILTER_SANITIZE_STRING);
-            
+
             if (!isset($transp->from)) {
                 $this->view->message = json_encode(array('Error' => 'From must not be empty', 'Result' => 'addtransp', 'Data' => ''));
                 $transp->reason = 'РЦ не указан';
@@ -1247,8 +1247,11 @@ class Api extends \App\Page {
         $claim_types = $this->request->post('claim_types');
         $claim_types = //html_entity_decode($transp);
                 html_entity_decode($claim_types, ENT_QUOTES | ENT_XML1, 'UTF-8');
-        $claim_types = json_decode($claim_types);
-
+        if ($claim_types == '') {
+            $claim_types = [];
+        } else {
+            $claim_types = json_decode($claim_types);
+        }
         if (!is_array($claim_types)) {
             $this->view->message = json_encode(array('Error' => array('Claim types format is wrong'), 'Result' => 'driverrelease', 'Data' => ''));
             return;
