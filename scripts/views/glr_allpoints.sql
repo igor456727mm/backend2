@@ -31,7 +31,8 @@ AS
 `lt`.`ORG_ID` AS `ORG_TGT_ID`,
 m.MARK,
 p.REL_STS_DTTM,
-m.MARK_COMMENT
+m.MARK_COMMENT,
+t.DRIVER_PHONE
 from 
  `glr_trnsp_pnt` `p` 
   join `glr_trnsp` `t` on `p`.`TRNSP_ID` = `t`.`TRNSP_ID`

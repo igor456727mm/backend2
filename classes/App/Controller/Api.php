@@ -512,6 +512,17 @@ class Api extends \App\Page {
                 $j = $j + 1;
                 continue;
             }
+            
+            if (!isset($transp->phone)) {
+                $this->view->message = json_encode(array('Error' => 'Phone must not be empty', 'Result' => 'addtransp', 'Data' => ''));
+                $transp->reason = 'Телефон не указан';
+                $err_array[$j] = $transp;
+                $j = $j + 1;
+                continue;
+            }
+            $phone = $transp->phone;
+            $phone = filter_var($phone, FILTER_SANITIZE_STRING);
+            
             if (!isset($transp->from)) {
                 $this->view->message = json_encode(array('Error' => 'From must not be empty', 'Result' => 'addtransp', 'Data' => ''));
                 $transp->reason = 'РЦ не указан';
@@ -670,6 +681,7 @@ class Api extends \App\Page {
             $org_e->save();
 
             $transp_e->TU = $tu;
+            $transp_e->DRIVER_PHONE = $phone;
             $transp_e->FULL_NM = $fio;
             $transp_e->ORG_ID = $org_e->id();
             $transp_e->save();
@@ -1258,7 +1270,7 @@ class Api extends \App\Page {
             return;
         }
 
-        $dttm = $this->check_field('rel_dttm', '', '', false, false,false,false);
+        $dttm = $this->check_field('rel_dttm', '', '', false, false, false, false);
         if (!is_object($dttm)) {
             $this->view->message = json_encode(array('Error' => $dttm, 'Result' => 'driverrelease', 'Data' => ''));
             return;
@@ -1600,7 +1612,7 @@ class Api extends \App\Page {
              */
             $rec['TU'] = $pnt->TU;
             $rec['FULL_NM'] = $pnt->FULL_NM;
-            $rec['DRIVER_PHONE']='';
+            $rec['DRIVER_PHONE'] = $pnt->DRIVER_PHONE;
             $rec['TRNSP_PNT_ID'] = $pnt->TRNSP_PNT_ID;
             $rec['LOC_PLAN_DTTM'] = $pnt->LOC_PLAN_DTTM;
             $rec['TRNSP_PNT_STS_TYPE_CD'] = $pnt->TRNSP_PNT_STS_TYPE_NM;
@@ -1620,22 +1632,21 @@ class Api extends \App\Page {
                 $rec['SHOP_MARK'] = $pnt->MARK;
                 $rec['REL_STS_DTTM'] = $pnt->REL_STS_DTTM;
                 $rec['SHOP_COMMENT'] = $pnt->MARK_COMMENT;
-                $pnt1=$this->pixie->orm->get('pnt')->
-                    where('TRNSP_PNT_ID', $pnt->TRNSP_PNT_ID)->find();
-                $claims=$pnt1->claims->find_all();
-                $carr=[];
-                $j=0;
+                $pnt1 = $this->pixie->orm->get('pnt')->
+                                where('TRNSP_PNT_ID', $pnt->TRNSP_PNT_ID)->find();
+                $claims = $pnt1->claims->find_all();
+                $carr = [];
+                $j = 0;
                 foreach ($claims as $claim) {
-                  
-                  $res1=[];
-                  $res1['CLAIM_TYPE_CD']=$claim->CLAIM_TYPE_CD;
-                  $res1['CLAIM_TYPE_NM']=$claim->claimtype->CLAIM_TYPE_NM;
-                  $carr[$j]=$res1;
-                  $j=$j+1;
+
+                    $res1 = [];
+                    $res1['CLAIM_TYPE_CD'] = $claim->CLAIM_TYPE_CD;
+                    $res1['CLAIM_TYPE_NM'] = $claim->claimtype->CLAIM_TYPE_NM;
+                    $carr[$j] = $res1;
+                    $j = $j + 1;
                 }
-                
-                $rec['CLAIMS']= $carr;
-                
+
+                $rec['CLAIMS'] = $carr;
             }
             $res[$i] = $rec;
             $i = $i + 1;
