@@ -18,7 +18,6 @@
         "denpa/php-bitcoinrpc": "^2.0",
         "phpgangsta/googleauthenticator": "dev-master",
         "rbdwllr/reallysimplejwt": "^2.0",
-        "phpoffice/phpspreadsheet": "*.*"
     },
     "extra": {
         "branch-alias": {
