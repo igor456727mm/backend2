@@ -1618,7 +1618,22 @@ class Api extends \App\Page {
                 $rec['SHOP_MARK'] = $pnt->MARK;
                 $rec['REL_STS_DTTM'] = $pnt->REL_STS_DTTM;
                 $rec['SHOP_COMMENT'] = $pnt->MARK_COMMENT;
-                $rec['CLAIMS']=$pnt->claims->find_all()->as_array();
+                $pnt1=$this->pixie->orm->get('pnt')->
+                    where('TRNSP_PNT_ID', $pnt->TRNSP_PNT_ID)->find();
+                $claims=$pnt1->claims->find_all();
+                $carr=[];
+                $j=0;
+                foreach ($claims as $claim) {
+                  
+                  $res1=[];
+                  $res1['CLAIM_TYPE_CD']=$claim->CLAIM_TYPE_CD;
+                  $res1['CLAIM_TYPE_NM']=$claim->claimtype->CLAIM_TYPE_NM;
+                  $carr[$j]=$res1;
+                  $j=$j+1;
+                }
+                
+                $rec['CLAIMS']= $carr;
+                
             }
             $res[$i] = $rec;
             $i = $i + 1;

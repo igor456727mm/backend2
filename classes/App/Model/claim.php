@@ -8,4 +8,7 @@ class Claim extends \PHPixie\ORM\Model {
 
     public $table = 'glr_trnsp_pnt_claim';
     public $id_field = 'TRNSP_PNT_CLAIM_ID';
+         protected $belongs_to = array(
+        'claimtype' => array('model' => 'claimtype', 'key' => 'CLAIM_TYPE_CD')
+    );
 }
