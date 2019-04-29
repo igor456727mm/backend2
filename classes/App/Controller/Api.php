@@ -1102,10 +1102,10 @@ class Api extends \App\Page {
     }
 
     function action_prometheus() {
-        $ip=$_SERVER['HTTP_HOST'];
-        $ret = $this->glr_curl("/apiopen/login", 'username=iko.zyrev@gmail.com&password=seliger9&ip='.$ip);
+        $ip = $_SERVER['HTTP_HOST'];
+        $ret = $this->glr_curl("/apiopen/login", 'username=iko.zyrev@gmail.com&password=seliger9&ip=' . $ip);
         $data = json_decode($ret);
-        $this->view->message = $this->check_action("login", "/apiopen/login", 'username=iko.zyrev@gmail.com&password=seliger9&ip='.$ip, 'token');
+        $this->view->message = $this->check_action("login", "/apiopen/login", 'username=iko.zyrev@gmail.com&password=seliger9&ip=' . $ip, 'token');
         $this->view->message = $this->view->message . "
 " . $this->check_action("getallpoints", "/api/getallpoints", 'token=' . $data->Data->token . '&date_from=2019-03-22 01:00&date_to=2019-03-22 01:15', 'TU', true);
         $this->view->subview = 'apianswer';
@@ -1194,6 +1194,14 @@ class Api extends \App\Page {
         if ($this->view->message) {
             return;
         }
+        $role_admin = $this->user->roles->where('CODE', 'ADMIN')->find();
+        $role_shop = $this->user->roles->where('CODE', 'SHOP')->find();
+
+        if (!($role_admin->loaded() || $role_shop->loaded())) {
+            $this->view->message = json_encode(array('Error' => 'You dont have access to this method.', 'Result' => 'driverrelease', 'Data' => ''));
+            return;
+        }
+
         date_default_timezone_set('Europe/Moscow');
 
         $pnt_id = $this->request->post('pnt_id');
@@ -1202,18 +1210,35 @@ class Api extends \App\Page {
             $this->view->message = json_encode(array('Error' => 'Point id is wrong.', 'Result' => 'driverrelease', 'Data' => ''));
             return;
         }
-        $pnt = $this->user->org->loc->pnts->
-                where("TRNSP_PNT_ID", $pnt_id)->
-                where("and", array("TRNSP_PNT_STS_TYPE_CD", "DELIVERED"))->
-                find();
+        if ($role_admin->loaded()) {
+            $pnt = $this->user->org->loc->pnts->
+                    where("TRNSP_PNT_ID", $pnt_id)->
+                    where("and", array("TRNSP_PNT_STS_TYPE_CD", 'IN', $this->pixie->db->expr('("DELIVERED","RELEASED")')))->
+                    find();
+        } else if ($role_shop->loaded()) {
+            $pnt = $this->user->org->loc->pnts->
+                    where("TRNSP_PNT_ID", $pnt_id)->
+                    where("and", array("TRNSP_PNT_STS_TYPE_CD", "DELIVERED"))->
+                    find();
+        }
         if (!$pnt->loaded()) {
             $this->view->message = json_encode(array('Error' => 'Point is not found.', 'Result' => 'driverrelease', 'Data' => ''));
             return;
         }
+        /*
+          $claim_type = $this->check_field('claim_type_cd', 'claimtype', 'CLAIM_TYPE_CD');
+          if (!is_object($claim_type)) {
+          $this->view->message = json_encode(array('Error' => $claim_type, 'Result' => 'driverrelease', 'Data' => ''));
+          return;
+          }
+         */
+        $claim_types = $this->request->post('claim_types');
+        $claim_types = //html_entity_decode($transp);
+                html_entity_decode($claim_types, ENT_QUOTES | ENT_XML1, 'UTF-8');
+        $claim_types = json_decode($claim_types);
 
-        $claim_type = $this->check_field('claim_type_cd', 'claimtype', 'CLAIM_TYPE_CD');
-        if (!is_object($claim_type)) {
-            $this->view->message = json_encode(array('Error' => $claim_type, 'Result' => 'driverrelease', 'Data' => ''));
+        if (!is_array($claim_types)) {
+            $this->view->message = json_encode(array('Error' => array('Claim types format is wrong'), 'Result' => 'driverrelease', 'Data' => ''));
             return;
         }
 
@@ -1233,12 +1258,9 @@ class Api extends \App\Page {
             return;
         }
 
-
-
-        $role = $this->user->roles->where('CODE', 'SHOP')->find();
-
-        if (!$role->loaded()) {
-            $this->view->message = json_encode(array('Error' => 'You dont have access to this method.', 'Result' => 'driverrelease', 'Data' => ''));
+        $dttm = $this->check_field('rel_dttm', '', '', false, false,false,false);
+        if (!is_object($dttm)) {
+            $this->view->message = json_encode(array('Error' => $dttm, 'Result' => 'driverrelease', 'Data' => ''));
             return;
         }
 
@@ -1252,9 +1274,12 @@ class Api extends \App\Page {
             return;
         }
         $timezone = new DateTimeZone($timezone_id);
-
-        $pnt->setmark($claim_type->CLAIM_TYPE_CD, $shop_mark->value, $shop_comment->value, $this->user->id());
-        $pnt->setstatus('RELEASED', 0, $this->user->id(), $timezone, null);
+        $pnt->deleteoldclaims('SHOP_MARKS_TU', $this->user->id());
+        foreach ($claim_types as $claim_type) {
+            $pnt->addclaim('SHOP_MARKS_TU', $claim_type->CLAIM_TYPE_CD, $this->user->id());
+        }
+        $pnt->setmark('SHOP_MARKS_TU', $shop_mark->value, $shop_comment->value, $this->user->id());
+        $pnt->setstatus('RELEASED', 0, $this->user->id(), $timezone, $dttm->value);
 
 
 
@@ -1589,6 +1614,12 @@ class Api extends \App\Page {
             $rec['LOC_TGT_LON'] = $pnt->LON;
             $rec['ORG_NM'] = $pnt->ORG_NM;
             $rec['ORG_TYPE_NM'] = $pnt->ORG_TYPE_NM;
+            if (!($role_transp->loaded() || $role_vendor->loaded())) {
+                $rec['SHOP_MARK'] = $pnt->MARK;
+                $rec['REL_STS_DTTM'] = $pnt->REL_STS_DTTM;
+                $rec['SHOP_COMMENT'] = $pnt->MARK_COMMENT;
+                $rec['CLAIMS']=$pnt->claims->find_all()->as_array();
+            }
             $res[$i] = $rec;
             $i = $i + 1;
         }
@@ -1697,8 +1728,8 @@ class Api extends \App\Page {
 
         $role_shop = $this->user->roles->where('CODE', 'SHOP')->find();
         $role_admin = $this->user->roles->where('CODE', 'ADMIN')->find();
-        
-        if (!($role_shop->loaded()||$role_admin->loaded())) {
+
+        if (!($role_shop->loaded() || $role_admin->loaded())) {
             $this->view->message = json_encode(array('Error' => "You dont't have access to this method", 'Result' => 'getclaimtypes', 'Data' => ''));
             return;
         }

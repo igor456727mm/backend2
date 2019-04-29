@@ -38,23 +38,100 @@ class Pnt extends \PHPixie\ORM\Model {
             'model' => 'pntmarkhis',
             'key' => 'TRNSP_PNT_ID'
         ),
+        'claimhis' => array(
+            'model' => 'claimhis',
+            'key' => 'TRNSP_PNT_ID'
+        ),
+        'claims' => array(
+            'model' => 'claim',
+            'key' => 'TRNSP_PNT_ID'
+        ),
+        'marks' => array(
+            'model' => 'mark',
+            'key' => 'TRNSP_PNT_ID'
+        ),
     );
+    
+    public function deleteoldclaims($mark_type, $user_id) {
+        $claims=$this->claims->
+                where('MARK_TYPE_CD', $mark_type)->
+                find_all();
+        foreach ($claims as $claim) {
+            $claim->delete();
+        }
+        $claim_hst = $this->claimhis->
+                where('TRNSP_PNT_CLAIM_TYPE_TO', 'is', $this->pixie->db->expr('NULL'))->
+                where('and', array('MARK_TYPE_CD', $mark_type))->
+                find_all();
+        foreach ($claim_hst as $rec) {
+            $rec->TRNSP_PNT_CLAIM_TYPE_TO=date("Y-m-d H:i:s");
+            $rec->save();
+        }
+    }
 
-    public function setmark($claim_type_cd, $shop_mark, $shop_comment, $user_id) {
-        $this->CLAIM_TYPE_CD = $claim_type_cd;
-        $this->SHOP_MARK = $shop_mark;
-        $this->SHOP_COMMENT = $shop_comment;
-        $this->SHOP_MARK_USER_ID = $user_id;
-        $this->save();
+    public function addclaim($mark_type, $claim_type_cd, $user_id) {
+        $claim_type = $this->claims->
+                where('CLAIM_TYPE_CD', $claim_type_cd)->
+                where('and', array('MARK_TYPE_CD', $mark_type))->
+                find();
+        if ($claim_type->loaded()) {
+            return false;
+        } else {
+            $claim_type->CLAIM_TYPE_CD = $claim_type_cd;
+            $claim_type->CLAIM_DTTM = date("Y-m-d H:i:s");
+            $claim_type->MARK_TYPE_CD = $mark_type;
+            $claim_type->TRNSP_PNT_ID = $this->id();
+            $claim_type->USER_ID = $user_id;
+            $claim_type->save();
+        }
+        $claim_type_hst = $this->claimhis->
+                where('TRNSP_PNT_CLAIM_TYPE_TO', 'is', $this->pixie->db->expr('NULL'))->
+                where('and', array('MARK_TYPE_CD', $mark_type))->
+                where('and', array('CLAIM_TYPE_CD', $claim_type_cd))->
+                find();
+        if (!$claim_type_hst->loaded()) {
+            $claim_type_hst = $this->pixie->orm->get('claimhis');
+            $claim_type_hst->TRNSP_PNT_CLAIM_TYPE_FROM = date("Y-m-d H:i:s");
+            $claim_type_hst->CLAIM_TYPE_CD = $claim_type_cd;
+            $claim_type_hst->USER_ID = $user_id;
+            $claim_type_hst->MARK_TYPE_CD = $mark_type;
+            $claim_type_hst->TRNSP_PNT_ID = $this->id();
+            $claim_type_hst->save();
+        } else {
+            $claim_type_hst->TRNSP_PNT_CLAIM_TYPE_TO = date("Y-m-d H:i:s");
+            $claim_type_hst->save();
+            $claim_type_hst = $this->pixie->orm->get('claimhis');
+            $claim_type_hst->TRNSP_PNT_CLAIM_TYPE_FROM = date("Y-m-d H:i:s");
+            $claim_type_hst->CLAIM_TYPE_CD = $claim_type_cd;
+            $claim_type_hst->USER_ID = $user_id;
+            $claim_type_hst->MARK_TYPE_CD = $mark_type;
+            $claim_type_hst->TRNSP_PNT_ID = $this->id();
+            $claim_type_hst->save();
+        }
+    }
+
+    public function setmark($mark_type, $shop_mark, $shop_comment, $user_id) {
+        //$this->mark->CLAIM_TYPE_CD = $claim_type_cd;
+        $mark = $this->marks->where('MARK_TYPE_CD', $mark_type)->find();
+        $mark->MARK = $shop_mark;
+        $mark->MARK_DTTM = date("Y-m-d H:i:s");
+        $mark->MARK_TYPE_CD = $mark_type;
+        $mark->MARK_COMMENT = $shop_comment;
+        $mark->TRNSP_PNT_ID=$this->id();
+        $mark->USER_ID = $user_id;
+        $mark->save();
 
         $pntMark = $this->markhis->
-                        where('TRNSP_PNT_MARK_TO', 'is', $this->pixie->db->expr('NULL'))->find();
+                where('TRNSP_PNT_MARK_TO', 'is', $this->pixie->db->expr('NULL'))->
+                where('and', array('MARK_TYPE_CD', $mark_type))->
+                find();
         if (!$pntMark->loaded()) {
             $pntMark = $this->pixie->orm->get('pntmarkhis');
             $pntMark->TRNSP_PNT_MARK_FROM = date("Y-m-d H:i:s");
-            $pntMark->CLAIM_TYPE_CD = $claim_type_cd;
-            $pntMark->SHOP_MARK = $shop_mark;
-            $pntMark->SHOP_COMMENT = $shop_comment;
+            //$pntMark->CLAIM_TYPE_CD = $claim_type_cd;
+            $pntMark->MARK = $shop_mark;
+            $pntMark->MARK_TYPE_CD = $mark_type;
+            $pntMark->MARK_COMMENT = $shop_comment;
             $pntMark->USER_ID = $user_id;
             $pntMark->TRNSP_PNT_ID = $this->id();
             $pntMark->save();
@@ -63,9 +140,10 @@ class Pnt extends \PHPixie\ORM\Model {
             $pntMark->save();
             $pntMark = $this->pixie->orm->get('pntmarkhis');
             $pntMark->TRNSP_PNT_MARK_FROM = date("Y-m-d H:i:s");
-            $pntMark->CLAIM_TYPE_CD = $claim_type_cd;
-            $pntMark->SHOP_MARK = $shop_mark;
-            $pntMark->SHOP_COMMENT = $shop_comment;
+            //$pntMark->CLAIM_TYPE_CD = $claim_type_cd;
+            $pntMark->MARK = $shop_mark;
+            $pntMark->MARK_TYPE_CD = $mark_type;
+            $pntMark->MARK_COMMENT = $shop_comment;
             $pntMark->USER_ID = $user_id;
             $pntMark->TRNSP_PNT_ID = $this->id();
             $pntMark->save();
