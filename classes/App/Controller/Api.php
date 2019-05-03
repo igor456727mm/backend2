@@ -1385,6 +1385,41 @@ class Api extends \App\Page {
         $this->view->subview = 'apianswer';
     }
 
+        public function action_getclaims() {
+
+        if ($this->view->message) {
+            return;
+        }
+
+        $role_admin = $this->user->roles->where('CODE', 'ADMIN')->find();
+        $role_shop = $this->user->roles->where('CODE', 'SHOP')->find();
+        
+        if (!($role_admin->loaded()||$role_shop->loaded())) {
+            $this->view->message = json_encode(array('Error' => "You dont't have access to this method", 'Result' => 'getclaims', 'Data' => ''));
+            return;
+        }
+
+        $pnt = $this->check_field('pnt_id', 'pnt', 'TRNSP_PNT_ID');
+        if (!is_object($pnt)) {
+            $this->view->message = json_encode(array('Error' => $pnt, 'Result' => 'driverrelease', 'Data' => ''));
+            return;
+        }
+
+        $res = [];
+        $i = 0;
+        $claims = $pnt->claims->find_all();
+        foreach ($claims as $claim) {
+            $rec=[];
+            $rec['CLAIM_TYPE_CD']=$claim->CLAIM_TYPE_CD;
+            $rec['CLAIM_TYPE_NM']=$claim->claimtype->CLAIM_TYPE_NM;
+            $res[$i] = $rec;
+            $i = $i + 1;
+        }
+
+        $this->view->message = json_encode(array('Error' => '', 'Result' => 'getclaims', 'Data' => $res));
+
+        $this->view->subview = 'apianswer';
+    }
     public function action_getlocs() {
 
         if ($this->view->message) {
@@ -1556,11 +1591,11 @@ class Api extends \App\Page {
                     where('LOC_PLAN_DTTM', '>=', $date_from)->
                     where('and', array('LOC_PLAN_DTTM', '<=', $date_to))->
                     find_all();
-            // $message=$this->pixie->orm->get('pntall')->
-            //         where('LOC_PLAN_DTTM', '>=', $date_from)->
-            //         where('and', array('LOC_PLAN_DTTM', '<=', $date_to))->
-            //         query->query()[0];
-            //$this->logerror('getallpoints', $message,'ERROR');
+             $message=$this->pixie->orm->get('pntall')->
+                     where('LOC_PLAN_DTTM', '>=', $date_from)->
+                     where('and', array('LOC_PLAN_DTTM', '<=', $date_to))->
+                     query->query()[0];
+            $this->logerror('getallpoints', $message,'ERROR');
         } else if ($role_transp->loaded() || $role_vendor->loaded()) {
             //$pnts = $this->pixie->orm->get('transp')->where('ORG_ID', $org->id())->pnts->find_all();
             $pnts = $this->pixie->orm->get('pntall')->where('ORG_ID', $org->id())->find_all();
