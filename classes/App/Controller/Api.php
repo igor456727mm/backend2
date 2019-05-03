@@ -1522,7 +1522,7 @@ class Api extends \App\Page {
         foreach ($pnts as $pnt) {
             $rec = [];
             $rec['TU'] = $transp->TU;
-            $rec['DRIVER_PHONE'] = $pnt->DRIVER_PHONE;
+            $rec['DRIVER_PHONE'] = $transp->DRIVER_PHONE;
             $rec['FULL_NM'] = $transp->FULL_NM;
             $rec['TRNSP_PNT_ID'] = $pnt->TRNSP_PNT_ID;
             $rec['LOC_PLAN_DTTM'] = $pnt->LOC_PLAN_DTTM;
