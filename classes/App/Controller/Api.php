@@ -1670,7 +1670,7 @@ class Api extends \App\Page {
                 $rec['SHOP_MARK'] = $pnt->MARK;
                 $rec['REL_STS_DTTM'] = $pnt->REL_STS_DTTM;
                 $rec['SHOP_COMMENT'] = $pnt->MARK_COMMENT;
-                $pnt1 = $this->pixie->orm->get('pnt')->
+              /*  $pnt1 = $this->pixie->orm->get('pnt')->
                                 where('TRNSP_PNT_ID', $pnt->TRNSP_PNT_ID)->find();
                 $claims = $pnt1->claims->find_all();
                 $carr = [];
@@ -1684,7 +1684,7 @@ class Api extends \App\Page {
                     $j = $j + 1;
                 }
 
-                $rec['CLAIMS'] = $carr;
+                $rec['CLAIMS'] = $carr;*/
             }
             $res[$i] = $rec;
             $i = $i + 1;
