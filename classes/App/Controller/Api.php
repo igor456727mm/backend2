@@ -1208,28 +1208,41 @@ class Api extends \App\Page {
         }
         $role_admin = $this->user->roles->where('CODE', 'ADMIN')->find();
         $role_shop = $this->user->roles->where('CODE', 'SHOP')->find();
+        $role_rc = $this->user->roles->where('CODE', 'RC')->find();
 
-        if (!($role_admin->loaded() || $role_shop->loaded())) {
+        if (!($role_admin->loaded() || $role_shop->loaded() || $role_rc->loaded())) {
             $this->view->message = json_encode(array('Error' => 'You dont have access to this method.', 'Result' => 'driverrelease', 'Data' => ''));
             return;
         }
 
         date_default_timezone_set('Europe/Moscow');
 
-        $pnt_id = $this->request->post('pnt_id');
-        $pnt_id = filter_var($pnt_id, FILTER_SANITIZE_STRING);
-        if (!is_numeric($pnt_id)) {
-            $this->view->message = json_encode(array('Error' => 'Point id is wrong.', 'Result' => 'driverrelease', 'Data' => ''));
+        /*   $pnt_id = $this->request->post('pnt_id');
+          $pnt_id = filter_var($pnt_id, FILTER_SANITIZE_STRING);
+          if (!is_numeric($pnt_id)) {
+          $this->view->message = json_encode(array('Error' => 'Point id is wrong.', 'Result' => 'driverrelease', 'Data' => ''));
+          return;
+          } */
+        $pnt = $this->check_field('pnt_id', 'pnt', 'trnsp_pnt_id');
+        if (!is_object($pnt)) {
+            $this->view->message = json_encode(array('Error' => $pnt, 'Result' => 'driverrelease', 'Data' => ''));
             return;
         }
+        if ($pnt->loctgt->org->orgtype->id() == 'SHOP') {
+            $mark_type_cd = 'SHOP_MARKS_TU';
+        } else
+        if ($pnt->loctgt->org->orgtype->id() == 'RC') {
+            $mark_type_cd = 'RC_MARKS_TU';
+        }
+       // die($mark_type_cd);
         if ($role_admin->loaded()) {
             $pnt = $this->user->org->loc->pnts->
-                    where("TRNSP_PNT_ID", $pnt_id)->
+                    where("TRNSP_PNT_ID", $pnt->id())->
                     where("and", array("TRNSP_PNT_STS_TYPE_CD", 'IN', $this->pixie->db->expr('("DELIVERED","RELEASED")')))->
                     find();
-        } else if ($role_shop->loaded()) {
+        } else if ($role_shop->loaded() || $role_rc->loaded()) {
             $pnt = $this->user->org->loc->pnts->
-                    where("TRNSP_PNT_ID", $pnt_id)->
+                    where("TRNSP_PNT_ID", $pnt->id())->
                     where("and", array("TRNSP_PNT_STS_TYPE_CD", "DELIVERED"))->
                     find();
         }
@@ -1284,16 +1297,18 @@ class Api extends \App\Page {
         $lon = $pnt->loctgt->LON;
         //$timezone = $this->get_nearest_timezone($lat, $lon, 'RU');
         $timezone_id = $this->get_timezone($lat, $lon, 'glarus_digital');
+
         if (isset(json_decode($timezone_id)->Error)) {
             $this->view->message = json_encode(array('Error' => 'Timezone is not recognized:' . json_decode($timezone_id)->Error, 'Result' => 'driverrelease', 'Data' => ''));
             return;
         }
         $timezone = new DateTimeZone($timezone_id);
-        $pnt->deleteoldclaims('SHOP_MARKS_TU', $this->user->id());
+        //  die(print_r($timezone));
+        $pnt->deleteoldclaims($mark_type_cd, $this->user->id());
         foreach ($claim_types as $claim_type) {
-            $pnt->addclaim('SHOP_MARKS_TU', $claim_type->CLAIM_TYPE_CD, $this->user->id());
+            $pnt->addclaim($mark_type_cd, $claim_type->CLAIM_TYPE_CD, $this->user->id());
         }
-        $pnt->setmark('SHOP_MARKS_TU', $shop_mark->value, $shop_comment->value, $this->user->id());
+        $pnt->setmark($mark_type_cd, $shop_mark->value, $shop_comment->value, $this->user->id());
         $pnt->setstatus('RELEASED', 0, $this->user->id(), $timezone, $dttm->value);
 
 
@@ -1385,7 +1400,7 @@ class Api extends \App\Page {
         $this->view->subview = 'apianswer';
     }
 
-        public function action_getclaims() {
+    public function action_getclaims() {
 
         if ($this->view->message) {
             return;
@@ -1393,8 +1408,8 @@ class Api extends \App\Page {
 
         $role_admin = $this->user->roles->where('CODE', 'ADMIN')->find();
         $role_shop = $this->user->roles->where('CODE', 'SHOP')->find();
-        
-        if (!($role_admin->loaded()||$role_shop->loaded())) {
+
+        if (!($role_admin->loaded() || $role_shop->loaded())) {
             $this->view->message = json_encode(array('Error' => "You dont't have access to this method", 'Result' => 'getclaims', 'Data' => ''));
             return;
         }
@@ -1409,9 +1424,9 @@ class Api extends \App\Page {
         $i = 0;
         $claims = $pnt->claims->find_all();
         foreach ($claims as $claim) {
-            $rec=[];
-            $rec['CLAIM_TYPE_CD']=$claim->CLAIM_TYPE_CD;
-            $rec['CLAIM_TYPE_NM']=$claim->claimtype->CLAIM_TYPE_NM;
+            $rec = [];
+            $rec['CLAIM_TYPE_CD'] = $claim->CLAIM_TYPE_CD;
+            $rec['CLAIM_TYPE_NM'] = $claim->claimtype->CLAIM_TYPE_NM;
             $res[$i] = $rec;
             $i = $i + 1;
         }
@@ -1420,6 +1435,7 @@ class Api extends \App\Page {
 
         $this->view->subview = 'apianswer';
     }
+
     public function action_getlocs() {
 
         if ($this->view->message) {
@@ -1591,11 +1607,11 @@ class Api extends \App\Page {
                     where('LOC_PLAN_DTTM', '>=', $date_from)->
                     where('and', array('LOC_PLAN_DTTM', '<=', $date_to))->
                     find_all();
-             $message=$this->pixie->orm->get('pntall')->
-                     where('LOC_PLAN_DTTM', '>=', $date_from)->
-                     where('and', array('LOC_PLAN_DTTM', '<=', $date_to))->
-                     query->query()[0];
-            $this->logerror('getallpoints', $message,'ERROR');
+  //          $message = $this->pixie->orm->get('pntall')->
+                            where('LOC_PLAN_DTTM', '>=', $date_from)->
+                            where('and', array('LOC_PLAN_DTTM', '<=', $date_to))->
+                    query->query()[0];
+ //           $this->logerror('getallpoints', $message, 'ERROR');
         } else if ($role_transp->loaded() || $role_vendor->loaded()) {
             //$pnts = $this->pixie->orm->get('transp')->where('ORG_ID', $org->id())->pnts->find_all();
             $pnts = $this->pixie->orm->get('pntall')->where('ORG_ID', $org->id())->find_all();
@@ -1664,27 +1680,28 @@ class Api extends \App\Page {
             $rec['LOC_ADDR'] = $pnt->ADDR;
             $rec['LOC_TGT_LAT'] = $pnt->LAT;
             $rec['LOC_TGT_LON'] = $pnt->LON;
+            $rec['LOC_TGT_TYPE_CD'] = $pnt->LOC_TGT_TYPE_CD;
             $rec['ORG_NM'] = $pnt->ORG_NM;
             $rec['ORG_TYPE_NM'] = $pnt->ORG_TYPE_NM;
             if (!($role_transp->loaded() || $role_vendor->loaded())) {
                 $rec['SHOP_MARK'] = $pnt->MARK;
                 $rec['REL_STS_DTTM'] = $pnt->REL_STS_DTTM;
                 $rec['SHOP_COMMENT'] = $pnt->MARK_COMMENT;
-              /*  $pnt1 = $this->pixie->orm->get('pnt')->
-                                where('TRNSP_PNT_ID', $pnt->TRNSP_PNT_ID)->find();
-                $claims = $pnt1->claims->find_all();
-                $carr = [];
-                $j = 0;
-                foreach ($claims as $claim) {
+                /*  $pnt1 = $this->pixie->orm->get('pnt')->
+                  where('TRNSP_PNT_ID', $pnt->TRNSP_PNT_ID)->find();
+                  $claims = $pnt1->claims->find_all();
+                  $carr = [];
+                  $j = 0;
+                  foreach ($claims as $claim) {
 
-                    $res1 = [];
-                    $res1['CLAIM_TYPE_CD'] = $claim->CLAIM_TYPE_CD;
-                    $res1['CLAIM_TYPE_NM'] = $claim->claimtype->CLAIM_TYPE_NM;
-                    $carr[$j] = $res1;
-                    $j = $j + 1;
-                }
+                  $res1 = [];
+                  $res1['CLAIM_TYPE_CD'] = $claim->CLAIM_TYPE_CD;
+                  $res1['CLAIM_TYPE_NM'] = $claim->claimtype->CLAIM_TYPE_NM;
+                  $carr[$j] = $res1;
+                  $j = $j + 1;
+                  }
 
-                $rec['CLAIMS'] = $carr;*/
+                  $rec['CLAIMS'] = $carr; */
             }
             $res[$i] = $rec;
             $i = $i + 1;

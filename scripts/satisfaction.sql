@@ -210,3 +210,9 @@ insert into glr_claim_type set MARK_TYPE_CD='SHOP_MARKS_TU', CLAIM_TYPE_CD='DRV_
 insert into glr_claim_type set MARK_TYPE_CD='SHOP_MARKS_TU', CLAIM_TYPE_CD='DRV_PROBLEM_DRUNK',PRNT_CLAIM_TYPE_CD='DRV_PROBLEM',LVL=1, CLAIM_TYPE_NM='Водитель не трезв';
 insert into glr_claim_type set MARK_TYPE_CD='SHOP_MARKS_TU', CLAIM_TYPE_CD='DRV_PROBLEM_RAMP',PRNT_CLAIM_TYPE_CD='DRV_PROBLEM',LVL=1, CLAIM_TYPE_NM='Долго встает на рампу';
 
+insert into glr_claim_type (CLAIM_TYPE_CD,PRNT_CLAIM_TYPE_CD,CLAIM_TYPE_NM,LVL,MARK_TYPE_CD) 
+select concat(CLAIM_TYPE_CD,"_1"),CLAIM_TYPE_CD,CLAIM_TYPE_NM,1,MARK_TYPE_CD 
+from  glr_claim_type c where lvl is null and not exists (select 1 from glr_claim_type c1 where c1.PRNT_CLAIM_TYPE_CD=c.CLAIM_TYPE_CD);
+
+delete from glr_claim_type where CLAIM_TYPE_CD='OTHER_0_1';
+delete from glr_claim_type where CLAIM_TYPE_CD='OTHER_0';

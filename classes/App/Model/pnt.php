@@ -162,6 +162,7 @@ class Pnt extends \PHPixie\ORM\Model {
             $this->STS_TIMEZONE = $timezone->getName();
         }
         if ($status == 'RELEASED') {
+    //        die($dttm->format('Y-m-d H:i:s'));
             $this->REL_STS_DTTM = $dttm->format('Y-m-d H:i:s');
         } else {
             $this->STS_DTTM = $dttm->format('Y-m-d H:i:s');
