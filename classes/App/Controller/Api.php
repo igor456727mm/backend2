@@ -1608,9 +1608,9 @@ class Api extends \App\Page {
                     where('and', array('LOC_PLAN_DTTM', '<=', $date_to))->
                     find_all();
   //          $message = $this->pixie->orm->get('pntall')->
-                            where('LOC_PLAN_DTTM', '>=', $date_from)->
-                            where('and', array('LOC_PLAN_DTTM', '<=', $date_to))->
-                    query->query()[0];
+  //                          where('LOC_PLAN_DTTM', '>=', $date_from)->
+  //                          where('and', array('LOC_PLAN_DTTM', '<=', $date_to))->
+  //                  query->query()[0];
  //           $this->logerror('getallpoints', $message, 'ERROR');
         } else if ($role_transp->loaded() || $role_vendor->loaded()) {
             //$pnts = $this->pixie->orm->get('transp')->where('ORG_ID', $org->id())->pnts->find_all();
