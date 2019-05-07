@@ -178,6 +178,7 @@ ADD FOREIGN KEY (MARK_TYPE_CD) REFERENCES glr_mark_type (MARK_TYPE_CD);
 
 
 insert into glr_mark_type set MARK_TYPE_CD='SHOP_MARKS_TU';
+insert into glr_mark_type set MARK_TYPE_CD='RC_MARKS_TU';
 
 insert into glr_claim_type set MARK_TYPE_CD='SHOP_MARKS_TU', CLAIM_TYPE_CD='LATE', CLAIM_TYPE_NM='1.Грузовик опоздал';
 insert into glr_claim_type set MARK_TYPE_CD='SHOP_MARKS_TU', CLAIM_TYPE_CD='DOCS', CLAIM_TYPE_NM='2.Проблемы с документами';
@@ -209,6 +210,7 @@ insert into glr_claim_type set MARK_TYPE_CD='SHOP_MARKS_TU', CLAIM_TYPE_CD='VHL_
 insert into glr_claim_type set MARK_TYPE_CD='SHOP_MARKS_TU', CLAIM_TYPE_CD='DRV_PROBLEM_ROUGH',PRNT_CLAIM_TYPE_CD='DRV_PROBLEM',LVL=1, CLAIM_TYPE_NM='Водитель грубит';
 insert into glr_claim_type set MARK_TYPE_CD='SHOP_MARKS_TU', CLAIM_TYPE_CD='DRV_PROBLEM_DRUNK',PRNT_CLAIM_TYPE_CD='DRV_PROBLEM',LVL=1, CLAIM_TYPE_NM='Водитель не трезв';
 insert into glr_claim_type set MARK_TYPE_CD='SHOP_MARKS_TU', CLAIM_TYPE_CD='DRV_PROBLEM_RAMP',PRNT_CLAIM_TYPE_CD='DRV_PROBLEM',LVL=1, CLAIM_TYPE_NM='Долго встает на рампу';
+insert into glr_claim_type set MARK_TYPE_CD='SHOP_MARKS_TU', CLAIM_TYPE_CD='DRV_PROBLEM_DOC',PRNT_CLAIM_TYPE_CD='DRV_PROBLEM',LVL=1, CLAIM_TYPE_NM='Отметил прибытие, но поздно представил документы (более 10 минут)';
 
 insert into glr_claim_type (CLAIM_TYPE_CD,PRNT_CLAIM_TYPE_CD,CLAIM_TYPE_NM,LVL,MARK_TYPE_CD) 
 select concat(CLAIM_TYPE_CD,"_1"),CLAIM_TYPE_CD,CLAIM_TYPE_NM,1,MARK_TYPE_CD 

@@ -1234,7 +1234,7 @@ class Api extends \App\Page {
         if ($pnt->loctgt->org->orgtype->id() == 'RC') {
             $mark_type_cd = 'RC_MARKS_TU';
         }
-       // die($mark_type_cd);
+        // die($mark_type_cd);
         if ($role_admin->loaded()) {
             $pnt = $this->user->org->loc->pnts->
                     where("TRNSP_PNT_ID", $pnt->id())->
@@ -1607,14 +1607,17 @@ class Api extends \App\Page {
                     where('LOC_PLAN_DTTM', '>=', $date_from)->
                     where('and', array('LOC_PLAN_DTTM', '<=', $date_to))->
                     find_all();
-  //          $message = $this->pixie->orm->get('pntall')->
-  //                          where('LOC_PLAN_DTTM', '>=', $date_from)->
-  //                          where('and', array('LOC_PLAN_DTTM', '<=', $date_to))->
-  //                  query->query()[0];
- //           $this->logerror('getallpoints', $message, 'ERROR');
+            //          $message = $this->pixie->orm->get('pntall')->
+            //                          where('LOC_PLAN_DTTM', '>=', $date_from)->
+            //                          where('and', array('LOC_PLAN_DTTM', '<=', $date_to))->
+            //                  query->query()[0];
+            //           $this->logerror('getallpoints', $message, 'ERROR');
         } else if ($role_transp->loaded() || $role_vendor->loaded()) {
             //$pnts = $this->pixie->orm->get('transp')->where('ORG_ID', $org->id())->pnts->find_all();
-            $pnts = $this->pixie->orm->get('pntall')->where('ORG_ID', $org->id())->find_all();
+            $pnts = $this->pixie->orm->get('pntall')->where('ORG_ID', $org->id())->
+                    where('and',array('LOC_PLAN_DTTM', '>=', $date_from))->
+                    where('and', array('LOC_PLAN_DTTM', '<=', $date_to))->
+                    find_all();
         } else if ($role_rc->loaded()) {
             //$pnts = $this->pixie->orm->get('org')->where('ORG_TYPE_CD','RC')->loc->pnts->find_all();
             // $pnts = $this->pixie->orm->get('pntall')->
