@@ -420,7 +420,7 @@ class Api extends \App\Page {
         }
 
         if ($point->status('RELEASED')) {
-            $rel_dttm=$point->REL_STS_DTTM;
+            $rel_dttm = $point->REL_STS_DTTM;
             $point->setstatus('DELIVERED', 0, $this->user->id(), null, $dttm->value);
             $point->setstatus('RELEASED', 0, $this->user->id(), null, $rel_dttm);
         } else {
@@ -1310,10 +1310,12 @@ class Api extends \App\Page {
             return;
         }
         $timezone = new DateTimeZone($timezone_id);
-        if (!(($dttm=='null')||($dttm==''))) {
-            $timezone=null;
+        if (!(($dttm->value == 'null') || ($dttm->value == ''))) {
+            $timezone = null;
+        } else {
+            $dttm->value = null;
         }
-        //  die(print_r($timezone));
+        //die($dttm->value);
         $pnt->deleteoldclaims($mark_type_cd, $this->user->id());
         foreach ($claim_types as $claim_type) {
             $pnt->addclaim($mark_type_cd, $claim_type->CLAIM_TYPE_CD, $this->user->id());
