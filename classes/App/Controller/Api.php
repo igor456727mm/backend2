@@ -1310,6 +1310,9 @@ class Api extends \App\Page {
             return;
         }
         $timezone = new DateTimeZone($timezone_id);
+        if (!(($dttm=='null')||($dttm==''))) {
+            $timezone=null;
+        }
         //  die(print_r($timezone));
         $pnt->deleteoldclaims($mark_type_cd, $this->user->id());
         foreach ($claim_types as $claim_type) {
