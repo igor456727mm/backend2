@@ -1408,8 +1408,9 @@ class Api extends \App\Page {
 
         $role_admin = $this->user->roles->where('CODE', 'ADMIN')->find();
         $role_shop = $this->user->roles->where('CODE', 'SHOP')->find();
+        $role_rc = $this->user->roles->where('CODE', 'RC')->find();
 
-        if (!($role_admin->loaded() || $role_shop->loaded())) {
+        if (!($role_admin->loaded() || $role_shop->loaded()|| $role_rc->loaded())) {
             $this->view->message = json_encode(array('Error' => "You dont't have access to this method", 'Result' => 'getclaims', 'Data' => ''));
             return;
         }
@@ -1419,10 +1420,20 @@ class Api extends \App\Page {
             $this->view->message = json_encode(array('Error' => $pnt, 'Result' => 'driverrelease', 'Data' => ''));
             return;
         }
+        
+        $orgtype=$pnt->loctgt->org->orgtype->ORG_TYPE_CD;
+        
+        if ($orgtype=='RC') {
+            $marktype='RC_MARKS_TU';
+        } else if ($orgtype=='SHOP') {
+            $marktype='SHOP_MARKS_TU';
+        } else {
+            $marktype='';
+        }
 
         $res = [];
         $i = 0;
-        $claims = $pnt->claims->find_all();
+        $claims = $pnt->claims->where('MARK_TYPE_CD',$marktype)->find_all();
         foreach ($claims as $claim) {
             $rec = [];
             $rec['CLAIM_TYPE_CD'] = $claim->CLAIM_TYPE_CD;
@@ -1615,7 +1626,7 @@ class Api extends \App\Page {
         } else if ($role_transp->loaded() || $role_vendor->loaded()) {
             //$pnts = $this->pixie->orm->get('transp')->where('ORG_ID', $org->id())->pnts->find_all();
             $pnts = $this->pixie->orm->get('pntall')->where('ORG_ID', $org->id())->
-                    where('and',array('LOC_PLAN_DTTM', '>=', $date_from))->
+                    where('and', array('LOC_PLAN_DTTM', '>=', $date_from))->
                     where('and', array('LOC_PLAN_DTTM', '<=', $date_to))->
                     find_all();
         } else if ($role_rc->loaded()) {
@@ -1813,17 +1824,36 @@ class Api extends \App\Page {
         }
 
         $role_shop = $this->user->roles->where('CODE', 'SHOP')->find();
+        $role_rc = $this->user->roles->where('CODE', 'RC')->find();
         $role_admin = $this->user->roles->where('CODE', 'ADMIN')->find();
 
-        if (!($role_shop->loaded() || $role_admin->loaded())) {
+        if (!($role_shop->loaded() || $role_admin->loaded() || $role_rc->loaded())) {
             $this->view->message = json_encode(array('Error' => "You dont't have access to this method", 'Result' => 'getclaimtypes', 'Data' => ''));
             return;
         }
 
         // $org = $this->user->org;
         // if (!$org->loaded()) {
-        $claimtypes = $this->pixie->orm->get('claimtype')->
-                find_all();
+        $pnt = $this->check_field('pnt_id', 'pnt', 'TRNSP_PNT_ID');
+        if (!is_object($pnt)) {
+            $this->view->message = json_encode(array('Error' => $pnt, 'Result' => 'driverrelease', 'Data' => ''));
+            return;
+        }
+        
+        $orgtype=$pnt->loctgt->org->orgtype->ORG_TYPE_CD;
+       // die($orgtype);
+        
+        if ($orgtype=='RC') {
+            $marktype='RC_MARKS_TU';
+        } else if ($orgtype=='SHOP') {
+            $marktype='SHOP_MARKS_TU';
+        } else {
+            $marktype='';
+        }
+
+        $claimtypes = $this->pixie->orm->get('claimtype')
+                ->where('MARK_TYPE_CD',$marktype)
+                ->find_all();
         // } else {
         //     $roles = $this->pixie->orm->get('role')->
         //             where('PARENT_CODE', 'TRANSPORT_COMPANY')->

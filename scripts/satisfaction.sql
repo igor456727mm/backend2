@@ -218,3 +218,34 @@ from  glr_claim_type c where lvl is null and not exists (select 1 from glr_claim
 
 delete from glr_claim_type where CLAIM_TYPE_CD='OTHER_0_1';
 delete from glr_claim_type where CLAIM_TYPE_CD='OTHER_0';
+
+ALTER TABLE `ikozyr9w_dh`.`glr_claim_type` DROP PRIMARY KEY, ADD PRIMARY KEY (`CLAIM_TYPE_CD`, `MARK_TYPE_CD`) USING BTREE;
+
+insert into glr_claim_type set MARK_TYPE_CD='RC_MARKS_TU', CLAIM_TYPE_CD='LATE', CLAIM_TYPE_NM='1.Грузовик опоздал';
+insert into glr_claim_type set MARK_TYPE_CD='RC_MARKS_TU', CLAIM_TYPE_CD='LOAD_PROBLEM', CLAIM_TYPE_NM='2.Проблемы с грузом поставщика';
+insert into glr_claim_type set MARK_TYPE_CD='RC_MARKS_TU', CLAIM_TYPE_CD='VHL_PROBLEM', CLAIM_TYPE_NM='3.Проблемы с транспортным средством';
+insert into glr_claim_type set MARK_TYPE_CD='RC_MARKS_TU', CLAIM_TYPE_CD='DRV_PROBLEM', CLAIM_TYPE_NM='4.Проблемы с водителем';
+
+insert into glr_claim_type set MARK_TYPE_CD='RC_MARKS_TU', CLAIM_TYPE_CD='LOAD_PROBLEM_DOCS',PRNT_CLAIM_TYPE_CD='LOAD_PROBLEM',LVL=1, CLAIM_TYPE_NM='Ошибки в документах';
+insert into glr_claim_type set MARK_TYPE_CD='RC_MARKS_TU', CLAIM_TYPE_CD='LOAD_PROBLEM_ORDER',PRNT_CLAIM_TYPE_CD='LOAD_PROBLEM',LVL=1, CLAIM_TYPE_NM='Нет заказа/ТОРГов в WMS';
+insert into glr_claim_type set MARK_TYPE_CD='RC_MARKS_TU', CLAIM_TYPE_CD='LOAD_PROBLEM_PALLET_QUALITY',PRNT_CLAIM_TYPE_CD='LOAD_PROBLEM',LVL=1, CLAIM_TYPE_NM='Некачественный поддон';
+insert into glr_claim_type set MARK_TYPE_CD='RC_MARKS_TU', CLAIM_TYPE_CD='LOAD_PROBLEM_PLTZING_QUALITY',PRNT_CLAIM_TYPE_CD='LOAD_PROBLEM',LVL=1, CLAIM_TYPE_NM='Некачественная паллетизация';
+insert into glr_claim_type set MARK_TYPE_CD='RC_MARKS_TU', CLAIM_TYPE_CD='LOAD_PROBLEM_PALLET_DAMAGE',PRNT_CLAIM_TYPE_CD='LOAD_PROBLEM',LVL=1, CLAIM_TYPE_NM='Паллеты с повреждениями';
+insert into glr_claim_type set MARK_TYPE_CD='RC_MARKS_TU', CLAIM_TYPE_CD='LOAD_PROBLEM_PALLET_LABEL',PRNT_CLAIM_TYPE_CD='LOAD_PROBLEM',LVL=1, CLAIM_TYPE_NM='Не читаются паллетные этикетки';
+insert into glr_claim_type set MARK_TYPE_CD='RC_MARKS_TU', CLAIM_TYPE_CD='LOAD_PROBLEM_FALLEN',PRNT_CLAIM_TYPE_CD='LOAD_PROBLEM',LVL=1, CLAIM_TYPE_NM='Завалились паллеты (невозможно выгрузить погрузчиком)';
+insert into glr_claim_type set MARK_TYPE_CD='RC_MARKS_TU', CLAIM_TYPE_CD='LOAD_PROBLEM_ALLIEN',PRNT_CLAIM_TYPE_CD='LOAD_PROBLEM',LVL=1, CLAIM_TYPE_NM='В грузовике находится сторонний груз';
+insert into glr_claim_type set MARK_TYPE_CD='RC_MARKS_TU', CLAIM_TYPE_CD='LOAD_PROBLEM_LESS',PRNT_CLAIM_TYPE_CD='LOAD_PROBLEM',LVL=1, CLAIM_TYPE_NM='Недовоз паллет';
+insert into glr_claim_type set MARK_TYPE_CD='RC_MARKS_TU', CLAIM_TYPE_CD='LOAD_PROBLEM_TU',PRNT_CLAIM_TYPE_CD='LOAD_PROBLEM',LVL=1, CLAIM_TYPE_NM='Не тот номер отгрузки прибыл';
+insert into glr_claim_type set MARK_TYPE_CD='RC_MARKS_TU', CLAIM_TYPE_CD='LOAD_PROBLEM_BIG',PRNT_CLAIM_TYPE_CD='LOAD_PROBLEM',LVL=1, CLAIM_TYPE_NM='Негабарит невозможно выгрузить погрузчиком';
+insert into glr_claim_type set MARK_TYPE_CD='RC_MARKS_TU', CLAIM_TYPE_CD='LOAD_PROBLEM_WEIGHT',PRNT_CLAIM_TYPE_CD='LOAD_PROBLEM',LVL=1, CLAIM_TYPE_NM='Неправильный вес/коэффициент паллет';
+
+insert into glr_claim_type set MARK_TYPE_CD='RC_MARKS_TU', CLAIM_TYPE_CD='VHL_PROBLEM_TENT',PRNT_CLAIM_TYPE_CD='VHL_PROBLEM',LVL=1, CLAIM_TYPE_NM='Поврежден тент';
+insert into glr_claim_type set MARK_TYPE_CD='RC_MARKS_TU', CLAIM_TYPE_CD='VHL_PROBLEM_TROSS',PRNT_CLAIM_TYPE_CD='VHL_PROBLEM',LVL=1, CLAIM_TYPE_NM='Поврежден пломбировочный трос';
+insert into glr_claim_type set MARK_TYPE_CD='RC_MARKS_TU', CLAIM_TYPE_CD='VHL_PROBLEM_SMOKE',PRNT_CLAIM_TYPE_CD='VHL_PROBLEM',LVL=1, CLAIM_TYPE_NM='Чрезвычайно дымный выхлоп';
+insert into glr_claim_type set MARK_TYPE_CD='RC_MARKS_TU', CLAIM_TYPE_CD='VHL_PROBLEM_FLOOR',PRNT_CLAIM_TYPE_CD='VHL_PROBLEM',LVL=1, CLAIM_TYPE_NM='Проблемы с полом';
+insert into glr_claim_type set MARK_TYPE_CD='RC_MARKS_TU', CLAIM_TYPE_CD='VHL_PROBLEM_TEMP',PRNT_CLAIM_TYPE_CD='VHL_PROBLEM',LVL=1, CLAIM_TYPE_NM='Нарушен температурный режим';
+
+insert into glr_claim_type set MARK_TYPE_CD='RC_MARKS_TU', CLAIM_TYPE_CD='DRV_PROBLEM_ROUGH',PRNT_CLAIM_TYPE_CD='DRV_PROBLEM',LVL=1, CLAIM_TYPE_NM='Водитель грубит';
+insert into glr_claim_type set MARK_TYPE_CD='RC_MARKS_TU', CLAIM_TYPE_CD='DRV_PROBLEM_DRUNK',PRNT_CLAIM_TYPE_CD='DRV_PROBLEM',LVL=1, CLAIM_TYPE_NM='Водитель не трезв';
+insert into glr_claim_type set MARK_TYPE_CD='RC_MARKS_TU', CLAIM_TYPE_CD='DRV_PROBLEM_RAMP',PRNT_CLAIM_TYPE_CD='DRV_PROBLEM',LVL=1, CLAIM_TYPE_NM='Долго встает на рампу';
+insert into glr_claim_type set MARK_TYPE_CD='RC_MARKS_TU', CLAIM_TYPE_CD='DRV_PROBLEM_DOC',PRNT_CLAIM_TYPE_CD='DRV_PROBLEM',LVL=1, CLAIM_TYPE_NM='Отметил прибытие, но поздно представил документы (более 10 минут)';
