@@ -419,9 +419,13 @@ class Api extends \App\Page {
             return;
         }
 
-
-        $point->setstatus('DELIVERED', 0, $this->user->id(), null, $dttm->value);
-
+        if ($point->status('RELEASED')) {
+            $rel_dttm=$point->REL_STS_DTTM;
+            $point->setstatus('DELIVERED', 0, $this->user->id(), null, $dttm->value);
+            $point->setstatus('RELEASED', 0, $this->user->id(), null, $rel_dttm);
+        } else {
+            $point->setstatus('DELIVERED', 0, $this->user->id(), null, $dttm->value);
+        }
         $this->view->message = json_encode(array('Error' => "", 'Result' => 'changepointdate', 'Data' => 'Ok'));
     }
 
@@ -1233,6 +1237,9 @@ class Api extends \App\Page {
         } else
         if ($pnt->loctgt->org->orgtype->id() == 'RC') {
             $mark_type_cd = 'RC_MARKS_TU';
+        } else {
+            $this->view->message = json_encode(array('Error' => 'Для данного типа точки нельзя устанавливать оценки', 'Result' => 'driverrelease', 'Data' => ''));
+            return;
         }
         // die($mark_type_cd);
         if ($role_admin->loaded()) {
@@ -1260,7 +1267,7 @@ class Api extends \App\Page {
         $claim_types = $this->request->post('claim_types');
         $claim_types = //html_entity_decode($transp);
                 html_entity_decode($claim_types, ENT_QUOTES | ENT_XML1, 'UTF-8');
-        if ($claim_types == '') {
+        if (($claim_types == '') || ($claim_types == 'null')) {
             $claim_types = [];
         } else {
             $claim_types = json_decode($claim_types);
@@ -1410,7 +1417,7 @@ class Api extends \App\Page {
         $role_shop = $this->user->roles->where('CODE', 'SHOP')->find();
         $role_rc = $this->user->roles->where('CODE', 'RC')->find();
 
-        if (!($role_admin->loaded() || $role_shop->loaded()|| $role_rc->loaded())) {
+        if (!($role_admin->loaded() || $role_shop->loaded() || $role_rc->loaded())) {
             $this->view->message = json_encode(array('Error' => "You dont't have access to this method", 'Result' => 'getclaims', 'Data' => ''));
             return;
         }
@@ -1420,20 +1427,20 @@ class Api extends \App\Page {
             $this->view->message = json_encode(array('Error' => $pnt, 'Result' => 'driverrelease', 'Data' => ''));
             return;
         }
-        
-        $orgtype=$pnt->loctgt->org->orgtype->ORG_TYPE_CD;
-        
-        if ($orgtype=='RC') {
-            $marktype='RC_MARKS_TU';
-        } else if ($orgtype=='SHOP') {
-            $marktype='SHOP_MARKS_TU';
+
+        $orgtype = $pnt->loctgt->org->orgtype->ORG_TYPE_CD;
+
+        if ($orgtype == 'RC') {
+            $marktype = 'RC_MARKS_TU';
+        } else if ($orgtype == 'SHOP') {
+            $marktype = 'SHOP_MARKS_TU';
         } else {
-            $marktype='';
+            $marktype = '';
         }
 
         $res = [];
         $i = 0;
-        $claims = $pnt->claims->where('MARK_TYPE_CD',$marktype)->find_all();
+        $claims = $pnt->claims->where('MARK_TYPE_CD', $marktype)->find_all();
         foreach ($claims as $claim) {
             $rec = [];
             $rec['CLAIM_TYPE_CD'] = $claim->CLAIM_TYPE_CD;
@@ -1839,20 +1846,20 @@ class Api extends \App\Page {
             $this->view->message = json_encode(array('Error' => $pnt, 'Result' => 'driverrelease', 'Data' => ''));
             return;
         }
-        
-        $orgtype=$pnt->loctgt->org->orgtype->ORG_TYPE_CD;
-       // die($orgtype);
-        
-        if ($orgtype=='RC') {
-            $marktype='RC_MARKS_TU';
-        } else if ($orgtype=='SHOP') {
-            $marktype='SHOP_MARKS_TU';
+
+        $orgtype = $pnt->loctgt->org->orgtype->ORG_TYPE_CD;
+        // die($orgtype);
+
+        if ($orgtype == 'RC') {
+            $marktype = 'RC_MARKS_TU';
+        } else if ($orgtype == 'SHOP') {
+            $marktype = 'SHOP_MARKS_TU';
         } else {
-            $marktype='';
+            $marktype = '';
         }
 
         $claimtypes = $this->pixie->orm->get('claimtype')
-                ->where('MARK_TYPE_CD',$marktype)
+                ->where('MARK_TYPE_CD', $marktype)
                 ->find_all();
         // } else {
         //     $roles = $this->pixie->orm->get('role')->

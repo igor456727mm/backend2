@@ -52,6 +52,11 @@ class Pnt extends \PHPixie\ORM\Model {
         ),
     );
     
+    public function status($status) {
+        return ($this->TRNSP_PNT_STS_TYPE_CD==$status);
+    }
+
+
     public function deleteoldclaims($mark_type, $user_id) {
         $claims=$this->claims->
                 where('MARK_TYPE_CD', $mark_type)->
