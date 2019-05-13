@@ -1421,8 +1421,12 @@ class Api extends \App\Page {
         $role_admin = $this->user->roles->where('CODE', 'ADMIN')->find();
         $role_shop = $this->user->roles->where('CODE', 'SHOP')->find();
         $role_rc = $this->user->roles->where('CODE', 'RC')->find();
+        $role_vendor = $this->user->roles->where('CODE', 'VENDOR')->find();
+        $role_transp = $this->user->roles->
+                where('CODE', 'TRANSPORT_COMPANY')->
+                find();
 
-        if (!($role_admin->loaded() || $role_shop->loaded() || $role_rc->loaded())) {
+        if (!($role_admin->loaded() || $role_shop->loaded() || $role_rc->loaded()|| $role_vendor->loaded()|| $role_transp->loaded())) {
             $this->view->message = json_encode(array('Error' => "You dont't have access to this method", 'Result' => 'getclaims', 'Data' => ''));
             return;
         }
@@ -1709,26 +1713,26 @@ class Api extends \App\Page {
             $rec['LOC_TGT_TYPE_CD'] = $pnt->LOC_TGT_TYPE_CD;
             $rec['ORG_NM'] = $pnt->ORG_NM;
             $rec['ORG_TYPE_NM'] = $pnt->ORG_TYPE_NM;
-            if (!($role_transp->loaded() || $role_vendor->loaded())) {
-                $rec['SHOP_MARK'] = $pnt->MARK;
-                $rec['REL_STS_DTTM'] = $pnt->REL_STS_DTTM;
-                $rec['SHOP_COMMENT'] = $pnt->MARK_COMMENT;
-                /*  $pnt1 = $this->pixie->orm->get('pnt')->
-                  where('TRNSP_PNT_ID', $pnt->TRNSP_PNT_ID)->find();
-                  $claims = $pnt1->claims->find_all();
-                  $carr = [];
-                  $j = 0;
-                  foreach ($claims as $claim) {
+            //     if (!($role_transp->loaded() || $role_vendor->loaded())) {
+            $rec['SHOP_MARK'] = $pnt->MARK;
+            $rec['REL_STS_DTTM'] = $pnt->REL_STS_DTTM;
+            $rec['SHOP_COMMENT'] = $pnt->MARK_COMMENT;
+            /*  $pnt1 = $this->pixie->orm->get('pnt')->
+              where('TRNSP_PNT_ID', $pnt->TRNSP_PNT_ID)->find();
+              $claims = $pnt1->claims->find_all();
+              $carr = [];
+              $j = 0;
+              foreach ($claims as $claim) {
 
-                  $res1 = [];
-                  $res1['CLAIM_TYPE_CD'] = $claim->CLAIM_TYPE_CD;
-                  $res1['CLAIM_TYPE_NM'] = $claim->claimtype->CLAIM_TYPE_NM;
-                  $carr[$j] = $res1;
-                  $j = $j + 1;
-                  }
+              $res1 = [];
+              $res1['CLAIM_TYPE_CD'] = $claim->CLAIM_TYPE_CD;
+              $res1['CLAIM_TYPE_NM'] = $claim->claimtype->CLAIM_TYPE_NM;
+              $carr[$j] = $res1;
+              $j = $j + 1;
+              }
 
-                  $rec['CLAIMS'] = $carr; */
-            }
+              $rec['CLAIMS'] = $carr; */
+            //   }
             $res[$i] = $rec;
             $i = $i + 1;
         }

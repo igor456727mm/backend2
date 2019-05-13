@@ -41,4 +41,4 @@ from
   join `glr_trnsp_pnt_sts_type` `s` on `s`.`TRNSP_PNT_STS_TYPE_CD` = `p`.`TRNSP_PNT_STS_TYPE_CD`
   join `glr_org` `o` on `o`.`ORG_ID` = `t`.`ORG_ID`
   join `glr_org_type` `ot` on `o`.`ORG_TYPE_CD` = `ot`.`ORG_TYPE_CD`
-  left join glr_trnsp_pnt_mark m on m.TRNSP_PNT_ID=p.TRNSP_PNT_ID and MARK_TYPE_CD='SHOP_MARKS_TU'
+  left join glr_trnsp_pnt_mark m on m.TRNSP_PNT_ID=p.TRNSP_PNT_ID and MARK_TYPE_CD in ('SHOP_MARKS_TU','RC_MARKS_TU')
