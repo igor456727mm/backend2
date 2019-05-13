@@ -668,17 +668,16 @@ class Api extends \App\Page {
                     where('ORG_NM', $org)->
                     find();
 
-            //  if (!$org_e->loaded()) {
-            $org_type_e = $this->pixie->orm->get('orgtype')->
-                    where('ORG_TYPE_NM', $org_type)->
-                    find();
-            if ($org_type_e->loaded()) {
-                $org_e->ORG_TYPE_CD = $org_type_e->ORG_TYPE_CD;
-            } else {
-                $org_e->ORG_TYPE_CD = 'TRANSPORT_COMPANY';
+            if (!$org_e->loaded()) {
+                $org_type_e = $this->pixie->orm->get('orgtype')->
+                        where('ORG_TYPE_NM', $org_type)->
+                        find();
+                if ($org_type_e->loaded()) {
+                    $org_e->ORG_TYPE_CD = $org_type_e->ORG_TYPE_CD;
+                } else {
+                    $org_e->ORG_TYPE_CD = 'TRANSPORT_COMPANY';
+                }
             }
-            //  }
-
 
             $org_e->ORG_NM = $org;
 
@@ -1426,7 +1425,7 @@ class Api extends \App\Page {
                 where('CODE', 'TRANSPORT_COMPANY')->
                 find();
 
-        if (!($role_admin->loaded() || $role_shop->loaded() || $role_rc->loaded()|| $role_vendor->loaded()|| $role_transp->loaded())) {
+        if (!($role_admin->loaded() || $role_shop->loaded() || $role_rc->loaded() || $role_vendor->loaded() || $role_transp->loaded())) {
             $this->view->message = json_encode(array('Error' => "You dont't have access to this method", 'Result' => 'getclaims', 'Data' => ''));
             return;
         }
@@ -1647,10 +1646,10 @@ class Api extends \App\Page {
                     find_all();
         } else if ($role_rc->loaded()) {
             //$pnts = $this->pixie->orm->get('org')->where('ORG_TYPE_CD','RC')->loc->pnts->find_all();
-             $pnts = $this->pixie->orm->get('pntall')->
-                     where('ORG_SRC_ID', $org->id())->
-                     where('or', array('ORG_TGT_ID', $org->id()))->
-                     find_all();
+            $pnts = $this->pixie->orm->get('pntall')->
+                    where('ORG_SRC_ID', $org->id())->
+                    where('or', array('ORG_TGT_ID', $org->id()))->
+                    find_all();
             //$pnts = $org->getallpoints($date_from, $date_to);
         } else if ($role_shop->loaded()) {
             $pnts = $org->getallpoints($date_from, $date_to);
