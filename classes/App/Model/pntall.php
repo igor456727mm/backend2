@@ -14,5 +14,26 @@ class Pntall extends \PHPixie\ORM\Model {
             'key' => 'TRNSP_ID'
         ),
     );
-
+protected $has_many = array(
+        'stshis' => array(
+            'model' => 'pntstshis',
+            'key' => 'TRNSP_PNT_ID'
+        ),
+        'markhis' => array(
+            'model' => 'pntmarkhis',
+            'key' => 'TRNSP_PNT_ID'
+        ),
+        'claimhis' => array(
+            'model' => 'claimhis',
+            'key' => 'TRNSP_PNT_ID'
+        ),
+        'claims' => array(
+            'model' => 'claim',
+            'key' => 'TRNSP_PNT_ID'
+        ),
+        'marks' => array(
+            'model' => 'mark',
+            'key' => 'TRNSP_PNT_ID'
+        ),
+    );
 }

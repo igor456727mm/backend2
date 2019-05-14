@@ -1,0 +1,6 @@
+cd /var/www
+git config credential.helper store
+git clone https://ikozyrev3@bitbucket.org/glarusdigital/glarus_api_server.git glarus
+cd glarus
+php ./composer.phar update -o  --prefer-dist
+sudo apt-get install php7.2-curl

@@ -1,5 +1,24 @@
 RewriteEngine On
+RewriteCond %{HTTP_HOST} !^www\.
+RewriteRule ^(.*)$ http://www.%{HTTP_HOST}/$1 [R=301,L]
+
 Options +FollowSymlinks
+RewriteEngine on
+RewriteBase /
+
+RewriteCond %{SERVER_PORT} !^443$
+
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+
 RewriteBase /
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule .* index.php?$0 [PT,L,QSA]
+
+#alias /phpbug "/phpbug"
+#<Directory "/phpbug">
+#AddDefaultCharset utf-8
+#RewriteEngine on
+#RewriteBase /phpbug
+#</Directory>
+

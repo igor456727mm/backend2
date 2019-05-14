@@ -4,6 +4,7 @@ namespace app\controller;
 
 use DateTime;
 use DateTimeZone;
+use ReallySimpleJWT\Token;
 
 if (!defined('API'))
     define('API', '1');
@@ -34,7 +35,10 @@ class Api extends \App\Page {
             return;
         }
 
-        $token = $this->pixie->orm->get('usertoken')->where('token', $this->token)->find();
+        $token = $this->pixie->orm->get('usertoken')->
+                where('token', $this->token)->
+                where('and', array('CREATED_DATE', '>', $this->pixie->db->expr('now() -interval 1 hour')))->
+                find();
         if (!$token->loaded()) {
             $this->view->message = json_encode(array('Error' => 'Token is incorrect', 'Result' => '', 'Data' => ''));
             return;
@@ -51,6 +55,33 @@ class Api extends \App\Page {
                 return;
             }
         }
+    }
+
+    public function action_jwttoken() {
+        if ($this->view->message) {
+            return;
+        }
+        $org_id = $this->user->org->id();
+        $dashboard_id = $this->user->org->orgtype->dashboard_id;
+        //$org=$this->user->org->find();
+        // die($dashboard_id);
+
+
+        if ($this->user->org->ORG_TYPE_CD == 'HEAD') {
+            $payload = [
+                'resource' => ["dashboard" => intval($dashboard_id)],
+                'params' => (Object) []
+            ];
+        } else {
+            $payload = [
+                'resource' => ["dashboard" => intval($dashboard_id)],
+                'params' => ["ид_тк" => intval($org_id)]
+            ];
+        }
+        $secret = '3cf6553218a113836bb700289e6fd3bc7bbe1b5b871801a7f316d2df4f21620f';
+        $token = Token::customPayload($payload, $secret);
+        $this->view->message = json_encode(array('Error' => '', 'Result' => 'jwttoken', 'Data' => "https://analytics.dostavkalm.ru:8443/embed/dashboard/" . $token));
+        $this->view->subview = 'apianswer';
     }
 
     public function action_addloc() {
@@ -308,12 +339,18 @@ class Api extends \App\Page {
         $this->view->subview = 'apianswer';
     }
 
-    private function check_field($input, $entity, $field, $need_entity = true, $need_exist = true, $need_value = true) {
+    private function check_field($input, $entity, $field, $need_entity = true, $need_exist = true, $need_value = true, $type = false) {
         $val = $this->request->post($input);
         $val = filter_var($val, FILTER_SANITIZE_STRING);
         if ($need_value) {
             if ($val == '') {
                 return $input . ' must not be empty';
+            }
+        }
+
+        if ($type == 'int') {
+            if (!is_numeric($val)) {
+                return $input . ' must be integer';
             }
         }
 
@@ -382,9 +419,13 @@ class Api extends \App\Page {
             return;
         }
 
-
-        $point->setstatus('DELIVERED', 0, $this->user->id(), null, $dttm->value);
-
+        if ($point->status('RELEASED')) {
+            $rel_dttm = $point->REL_STS_DTTM;
+            $point->setstatus('DELIVERED', 0, $this->user->id(), null, $dttm->value);
+            $point->setstatus('RELEASED', 0, $this->user->id(), null, $rel_dttm);
+        } else {
+            $point->setstatus('DELIVERED', 0, $this->user->id(), null, $dttm->value);
+        }
         $this->view->message = json_encode(array('Error' => "", 'Result' => 'changepointdate', 'Data' => 'Ok'));
     }
 
@@ -405,6 +446,10 @@ class Api extends \App\Page {
         return;
     }
 
+    public function action_addtransp1() {
+        
+    }
+
     public function action_addtransp() {
 
         if ($this->view->message) {
@@ -420,6 +465,8 @@ class Api extends \App\Page {
         $etlrun->updated = 0;
         $etlrun->etl_run_dttm = date("Y-m-d H:i:s");
 
+        $datetime = new DateTime();
+        //    $this->logerror('addtransp', 'Addtransp started at:' . $datetime->format('Y-m-d H:i:s u'));
 
         $role = $this->user->roles->where('CODE', 'ADMIN')->find();
         if (!$role->loaded()) {
@@ -448,7 +495,11 @@ class Api extends \App\Page {
         $j = 0;
         $err_array = [];
 
+        $datetime = new DateTime();
+        //  $this->logerror('addtransp', 'For loop started:' . $datetime->format('Y-m-d H:i:s u'));
+
         foreach ($transps as $transp) {
+
             if (!isset($transp->tu)) {
                 $this->view->message = json_encode(array('Error' => 'TU must not be empty', 'Result' => 'addtransp', 'Data' => ''));
                 $transp->reason = 'TU не указан';
@@ -465,6 +516,17 @@ class Api extends \App\Page {
                 $j = $j + 1;
                 continue;
             }
+
+            if (!isset($transp->phone)) {
+                $this->view->message = json_encode(array('Error' => 'Phone must not be empty', 'Result' => 'addtransp', 'Data' => ''));
+                $transp->reason = 'Телефон не указан';
+                $err_array[$j] = $transp;
+                $j = $j + 1;
+                continue;
+            }
+            $phone = $transp->phone;
+            $phone = filter_var($phone, FILTER_SANITIZE_STRING);
+
             if (!isset($transp->from)) {
                 $this->view->message = json_encode(array('Error' => 'From must not be empty', 'Result' => 'addtransp', 'Data' => ''));
                 $transp->reason = 'РЦ не указан';
@@ -606,23 +668,23 @@ class Api extends \App\Page {
                     where('ORG_NM', $org)->
                     find();
 
-            //  if (!$org_e->loaded()) {
-            $org_type_e = $this->pixie->orm->get('orgtype')->
-                    where('ORG_TYPE_NM', $org_type)->
-                    find();
-            if ($org_type_e->loaded()) {
-                $org_e->ORG_TYPE_CD = $org_type_e->ORG_TYPE_CD;
-            } else {
-                $org_e->ORG_TYPE_CD = 'TRANSPORT_COMPANY';
+            if (!$org_e->loaded()) {
+                $org_type_e = $this->pixie->orm->get('orgtype')->
+                        where('ORG_TYPE_NM', $org_type)->
+                        find();
+                if ($org_type_e->loaded()) {
+                    $org_e->ORG_TYPE_CD = $org_type_e->ORG_TYPE_CD;
+                } else {
+                    $org_e->ORG_TYPE_CD = 'TRANSPORT_COMPANY';
+                }
             }
-            //  }
-
 
             $org_e->ORG_NM = $org;
 
             $org_e->save();
 
             $transp_e->TU = $tu;
+            $transp_e->DRIVER_PHONE = $phone;
             $transp_e->FULL_NM = $fio;
             $transp_e->ORG_ID = $org_e->id();
             $transp_e->save();
@@ -631,6 +693,8 @@ class Api extends \App\Page {
                     where('LOC_NM', $to)->
                     where('and', array('LOC_STS_TYPE_CD', '<>', 'DELETED'))->
                     find();
+            $datetime = new DateTime();
+            //       $this->logerror('addtransp', 'Shop have not found started:' . $datetime->format('Y-m-d H:i:s u'));
 
             if (!$to_e->loaded()) {
 
@@ -681,7 +745,11 @@ class Api extends \App\Page {
             } else {
                 $etlrun->updated = $etlrun->updated + 1;
             }
+            $datetime = new DateTime();
+            $this->logerror('addtransp', 'Point_e save started:' . $datetime->format('Y-m-d H:i:s u'));
             $pnt_e->save();
+            $datetime = new DateTime();
+            //  $this->logerror('addtransp', 'Point_e status set started:' . $datetime->format('Y-m-d H:i:s u'));
             $pnt_e->setstatus('CREATED', 0, $this->user->id());
 
             $pnt_s = $this->pixie->orm->get('transp')->
@@ -700,7 +768,11 @@ class Api extends \App\Page {
             } else {
                 $etlrun->updated = $etlrun->updated + 1;
             }
+            $datetime = new DateTime();
+            //    $this->logerror('addtransp', 'Point_s save started:' . $datetime->format('Y-m-d H:i:s u'));
             $pnt_s->save();
+            $datetime = new DateTime();
+            //    $this->logerror('addtransp', 'Point_s status set started:' . $datetime->format('Y-m-d H:i:s u'));
             $pnt_s->setstatus('CREATED', 0, $this->user->id());
             $i = $i + 1;
             //    $log = $this->pixie->orm->get('log');
@@ -711,6 +783,8 @@ class Api extends \App\Page {
             //     $log->level_cd = 'INFO';
 //echo    $log->message;     
             //   $log->save();
+            $datetime = new DateTime();
+            //        $this->logerror('addtransp', 'For loop ended:' . $datetime->format('Y-m-d H:i:s u'));
         }
 
 
@@ -1002,6 +1076,56 @@ class Api extends \App\Page {
         return $angle * $earthRadius;
     }
 
+    function glr_curl($path, $param) {
+        //connect to web service
+        $url = 'http://localhost' . $path;
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10); //timeout in seconds
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $param);
+        $ret = curl_exec($ch);
+        curl_close($ch);
+        return $ret;
+    }
+
+    function check_action($action, $path, $param, $ret_param, $is_array = false) {
+        $ret = $this->glr_curl($path, $param);
+        if (!$ret) {
+            $res = 'grt_action_' . $action . ' -1';
+        }
+        //parse XML response
+        $data = json_decode($ret);
+        //echo '<pre>'.print_r($data,true).'</pre>'; die();
+        if ($is_array) {
+            if (!isset($data->Data[0]->$ret_param)) {
+                $res = 'grt_action_' . $action . ' 0';
+            } else {
+                $res = 'grt_action_' . $action . ' 1';
+            }
+        } else {
+            if (!isset($data->Data->$ret_param)) {
+                $res = 'grt_action_' . $action . ' 0';
+            } else {
+                $res = 'grt_action_' . $action . ' 1';
+            }
+        }
+        return $res;
+    }
+
+    function action_prometheus() {
+        $ip = $_SERVER['HTTP_HOST'];
+        $ret = $this->glr_curl("/apiopen/login", 'username=iko.zyrev@gmail.com&password=seliger9&ip=' . $ip);
+        $data = json_decode($ret);
+        $this->view->message = $this->check_action("login", "/apiopen/login", 'username=iko.zyrev@gmail.com&password=seliger9&ip=' . $ip, 'token');
+        $this->view->message = $this->view->message . "
+" . $this->check_action("getallpoints", "/api/getallpoints", 'token=' . $data->Data->token . '&date_from=2019-03-22 01:00&date_to=2019-03-22 01:15', 'TU', true);
+        $this->view->subview = 'apianswer';
+    }
+
     function get_timezone($latitude, $longitude, $username) {
 
         //error checking
@@ -1078,6 +1202,131 @@ class Api extends \App\Page {
             return $ret;
         }
         return 'unknown';
+    }
+
+    public function action_driverrelease() {
+
+        if ($this->view->message) {
+            return;
+        }
+        $role_admin = $this->user->roles->where('CODE', 'ADMIN')->find();
+        $role_shop = $this->user->roles->where('CODE', 'SHOP')->find();
+        $role_rc = $this->user->roles->where('CODE', 'RC')->find();
+
+        if (!($role_admin->loaded() || $role_shop->loaded() || $role_rc->loaded())) {
+            $this->view->message = json_encode(array('Error' => 'You dont have access to this method.', 'Result' => 'driverrelease', 'Data' => ''));
+            return;
+        }
+
+        date_default_timezone_set('Europe/Moscow');
+
+        /*   $pnt_id = $this->request->post('pnt_id');
+          $pnt_id = filter_var($pnt_id, FILTER_SANITIZE_STRING);
+          if (!is_numeric($pnt_id)) {
+          $this->view->message = json_encode(array('Error' => 'Point id is wrong.', 'Result' => 'driverrelease', 'Data' => ''));
+          return;
+          } */
+        $pnt = $this->check_field('pnt_id', 'pnt', 'trnsp_pnt_id');
+        if (!is_object($pnt)) {
+            $this->view->message = json_encode(array('Error' => $pnt, 'Result' => 'driverrelease', 'Data' => ''));
+            return;
+        }
+        if ($pnt->loctgt->org->orgtype->id() == 'SHOP') {
+            $mark_type_cd = 'SHOP_MARKS_TU';
+        } else
+        if ($pnt->loctgt->org->orgtype->id() == 'RC') {
+            $mark_type_cd = 'RC_MARKS_TU';
+        } else {
+            $this->view->message = json_encode(array('Error' => 'Для данного типа точки нельзя устанавливать оценки', 'Result' => 'driverrelease', 'Data' => ''));
+            return;
+        }
+        // die($mark_type_cd);
+        if ($role_admin->loaded()) {
+            $pnt = $this->user->org->loc->pnts->
+                    where("TRNSP_PNT_ID", $pnt->id())->
+                    where("and", array("TRNSP_PNT_STS_TYPE_CD", 'IN', $this->pixie->db->expr('("DELIVERED","RELEASED")')))->
+                    find();
+        } else if ($role_shop->loaded() || $role_rc->loaded()) {
+            $pnt = $this->user->org->loc->pnts->
+                    where("TRNSP_PNT_ID", $pnt->id())->
+                    where("and", array("TRNSP_PNT_STS_TYPE_CD", "DELIVERED"))->
+                    find();
+        }
+        if (!$pnt->loaded()) {
+            $this->view->message = json_encode(array('Error' => 'Point is not found.', 'Result' => 'driverrelease', 'Data' => ''));
+            return;
+        }
+        /*
+          $claim_type = $this->check_field('claim_type_cd', 'claimtype', 'CLAIM_TYPE_CD');
+          if (!is_object($claim_type)) {
+          $this->view->message = json_encode(array('Error' => $claim_type, 'Result' => 'driverrelease', 'Data' => ''));
+          return;
+          }
+         */
+        $claim_types = $this->request->post('claim_types');
+        $claim_types = //html_entity_decode($transp);
+                html_entity_decode($claim_types, ENT_QUOTES | ENT_XML1, 'UTF-8');
+        if (($claim_types == '') || ($claim_types == 'null')) {
+            $claim_types = [];
+        } else {
+            $claim_types = json_decode($claim_types);
+        }
+        if (!is_array($claim_types)) {
+            $this->view->message = json_encode(array('Error' => array('Claim types format is wrong'), 'Result' => 'driverrelease', 'Data' => ''));
+            return;
+        }
+
+        $shop_mark = $this->check_field('shop_mark', '', '', false, false, true, 'int');
+        if (!is_object($shop_mark)) {
+            $this->view->message = json_encode(array('Error' => $shop_mark, 'Result' => 'driverrelease', 'Data' => ''));
+            return;
+        }
+
+        $shop_comment = $this->check_field('shop_comment', '', '', false, false, false, false);
+        if (!is_object($shop_comment)) {
+            $this->view->message = json_encode(array('Error' => $shop_comment, 'Result' => 'driverrelease', 'Data' => ''));
+            return;
+        }
+        if (strlen($shop_comment->value) > 4000) {
+            $this->view->message = json_encode(array('Error' => 'Comment is too long', 'Result' => 'driverrelease', 'Data' => ''));
+            return;
+        }
+
+        $dttm = $this->check_field('rel_dttm', '', '', false, false, false, false);
+        if (!is_object($dttm)) {
+            $this->view->message = json_encode(array('Error' => $dttm, 'Result' => 'driverrelease', 'Data' => ''));
+            return;
+        }
+
+
+        $lat = $pnt->loctgt->LAT;
+        $lon = $pnt->loctgt->LON;
+        //$timezone = $this->get_nearest_timezone($lat, $lon, 'RU');
+        $timezone_id = $this->get_timezone($lat, $lon, 'glarus_digital');
+
+        if (isset(json_decode($timezone_id)->Error)) {
+            $this->view->message = json_encode(array('Error' => 'Timezone is not recognized:' . json_decode($timezone_id)->Error, 'Result' => 'driverrelease', 'Data' => ''));
+            return;
+        }
+        $timezone = new DateTimeZone($timezone_id);
+        if (!(($dttm->value == 'null') || ($dttm->value == ''))) {
+            $timezone = null;
+        } else {
+            $dttm->value = null;
+        }
+        //die($dttm->value);
+        $pnt->deleteoldclaims($mark_type_cd, $this->user->id());
+        foreach ($claim_types as $claim_type) {
+            $pnt->addclaim($mark_type_cd, $claim_type->CLAIM_TYPE_CD, $this->user->id());
+        }
+        $pnt->setmark($mark_type_cd, $shop_mark->value, $shop_comment->value, $this->user->id());
+        $pnt->setstatus('RELEASED', 0, $this->user->id(), $timezone, $dttm->value);
+
+
+
+        $this->view->message = json_encode(array('Error' => '', 'Result' => 'driverrelease', 'Data' => $pnt->REL_STS_DTTM));
+
+        $this->view->subview = 'apianswer';
     }
 
     public function action_driverfinish() {
@@ -1162,6 +1411,57 @@ class Api extends \App\Page {
         $this->view->subview = 'apianswer';
     }
 
+    public function action_getclaims() {
+
+        if ($this->view->message) {
+            return;
+        }
+
+        $role_admin = $this->user->roles->where('CODE', 'ADMIN')->find();
+        $role_shop = $this->user->roles->where('CODE', 'SHOP')->find();
+        $role_rc = $this->user->roles->where('CODE', 'RC')->find();
+        $role_vendor = $this->user->roles->where('CODE', 'VENDOR')->find();
+        $role_transp = $this->user->roles->
+                where('CODE', 'TRANSPORT_COMPANY')->
+                find();
+
+        if (!($role_admin->loaded() || $role_shop->loaded() || $role_rc->loaded() || $role_vendor->loaded() || $role_transp->loaded())) {
+            $this->view->message = json_encode(array('Error' => "You dont't have access to this method", 'Result' => 'getclaims', 'Data' => ''));
+            return;
+        }
+
+        $pnt = $this->check_field('pnt_id', 'pnt', 'TRNSP_PNT_ID');
+        if (!is_object($pnt)) {
+            $this->view->message = json_encode(array('Error' => $pnt, 'Result' => 'driverrelease', 'Data' => ''));
+            return;
+        }
+
+        $orgtype = $pnt->loctgt->org->orgtype->ORG_TYPE_CD;
+
+        if ($orgtype == 'RC') {
+            $marktype = 'RC_MARKS_TU';
+        } else if ($orgtype == 'SHOP') {
+            $marktype = 'SHOP_MARKS_TU';
+        } else {
+            $marktype = '';
+        }
+
+        $res = [];
+        $i = 0;
+        $claims = $pnt->claims->where('MARK_TYPE_CD', $marktype)->find_all();
+        foreach ($claims as $claim) {
+            $rec = [];
+            $rec['CLAIM_TYPE_CD'] = $claim->CLAIM_TYPE_CD;
+            $rec['CLAIM_TYPE_NM'] = $claim->claimtype->CLAIM_TYPE_NM;
+            $res[$i] = $rec;
+            $i = $i + 1;
+        }
+
+        $this->view->message = json_encode(array('Error' => '', 'Result' => 'getclaims', 'Data' => $res));
+
+        $this->view->subview = 'apianswer';
+    }
+
     public function action_getlocs() {
 
         if ($this->view->message) {
@@ -1206,13 +1506,12 @@ class Api extends \App\Page {
             return;
         }
 
-        $org = $this->user->org;
-
-        if (!$org->loaded()) {
-            $users = $this->pixie->orm->get('user')->where('NAME', '<>', 'driver')->find_all();
-        } else {
-            $users = $this->pixie->orm->get('user')->where('ORG_ID', $org->id())->where('and', array('NAME', '<>', 'driver'))->find_all();
-        }
+        //  $org = $this->user->org;
+        //  if (!$org->loaded()) {
+        $users = $this->pixie->orm->get('user')->where('NAME', '<>', 'driver')->find_all();
+        //  } else {
+        //      $users = $this->pixie->orm->get('user')->where('ORG_ID', $org->id())->where('and', array('NAME', '<>', 'driver'))->find_all();
+        //  }
 
         $res = [];
         $i = 0;
@@ -1265,6 +1564,7 @@ class Api extends \App\Page {
         foreach ($pnts as $pnt) {
             $rec = [];
             $rec['TU'] = $transp->TU;
+            $rec['DRIVER_PHONE'] = $transp->DRIVER_PHONE;
             $rec['FULL_NM'] = $transp->FULL_NM;
             $rec['TRNSP_PNT_ID'] = $pnt->TRNSP_PNT_ID;
             $rec['LOC_PLAN_DTTM'] = $pnt->LOC_PLAN_DTTM;
@@ -1333,35 +1633,38 @@ class Api extends \App\Page {
                     where('LOC_PLAN_DTTM', '>=', $date_from)->
                     where('and', array('LOC_PLAN_DTTM', '<=', $date_to))->
                     find_all();
-           // $message=$this->pixie->orm->get('pntall')->
-           //         where('LOC_PLAN_DTTM', '>=', $date_from)->
-           //         where('and', array('LOC_PLAN_DTTM', '<=', $date_to))->
-           //         query->query()[0];
-           //$this->logerror('getallpoints', $message,'ERROR');
+            //          $message = $this->pixie->orm->get('pntall')->
+            //                          where('LOC_PLAN_DTTM', '>=', $date_from)->
+            //                          where('and', array('LOC_PLAN_DTTM', '<=', $date_to))->
+            //                  query->query()[0];
+            //           $this->logerror('getallpoints', $message, 'ERROR');
         } else if ($role_transp->loaded() || $role_vendor->loaded()) {
             //$pnts = $this->pixie->orm->get('transp')->where('ORG_ID', $org->id())->pnts->find_all();
-            $pnts = $this->pixie->orm->get('pntall')->where('ORG_ID', $org->id())->find_all();
+            $pnts = $this->pixie->orm->get('pntall')->where('ORG_ID', $org->id())->
+                    where('and', array('LOC_PLAN_DTTM', '>=', $date_from))->
+                    where('and', array('LOC_PLAN_DTTM', '<=', $date_to))->
+                    find_all();
         } else if ($role_rc->loaded()) {
             //$pnts = $this->pixie->orm->get('org')->where('ORG_TYPE_CD','RC')->loc->pnts->find_all();
-           // $pnts = $this->pixie->orm->get('pntall')->
-           //         where('ORG_SRC_ID', $org->id())->
-           //         where('or', array('ORG_TGT_ID', $org->id()))->
-           //         find_all();
-            $pnts=$org->getallpoints($date_from,$date_to);
+            $pnts = $this->pixie->orm->get('pntall')->
+                    where('ORG_SRC_ID', $org->id())->
+                    where('or', array('ORG_TGT_ID', $org->id()))->
+                    find_all();
+            //$pnts = $org->getallpoints($date_from, $date_to);
         } else if ($role_shop->loaded()) {
-            $pnts=$org->getallpoints($date_from,$date_to);
+            $pnts = $org->getallpoints($date_from, $date_to);
             //$pnts = $this->pixie->orm->get('org')->where('ORG_TYPE_CD','RC')->loc->pnts->find_all();
-          //  $pnts = $this->pixie->orm->get('pntall')->
+            //  $pnts = $this->pixie->orm->get('pntall')->
             //        where('ORG_TGT_ID', $org->id())->
-              //      transp->pntall->
-                    //where('LOC_TGT_TYPE_CD', 'RC')->
-                   // where('or',array('ORG_TGT_ID',$org->id()))->
-                //    find_all();
-                   // query->query()[0];
-           // die($pnts);
-           // $pnts_shop = $this->pixie->orm->get('pntall')->
-           //         where('ORG_TGT_ID', $org->id())->
-           //         find_all();
+            //      transp->pntall->
+            //where('LOC_TGT_TYPE_CD', 'RC')->
+            // where('or',array('ORG_TGT_ID',$org->id()))->
+            //    find_all();
+            // query->query()[0];
+            // die($pnts);
+            // $pnts_shop = $this->pixie->orm->get('pntall')->
+            //         where('ORG_TGT_ID', $org->id())->
+            //         find_all();
         }
 
 
@@ -1392,6 +1695,7 @@ class Api extends \App\Page {
              */
             $rec['TU'] = $pnt->TU;
             $rec['FULL_NM'] = $pnt->FULL_NM;
+            $rec['DRIVER_PHONE'] = $pnt->DRIVER_PHONE;
             $rec['TRNSP_PNT_ID'] = $pnt->TRNSP_PNT_ID;
             $rec['LOC_PLAN_DTTM'] = $pnt->LOC_PLAN_DTTM;
             $rec['TRNSP_PNT_STS_TYPE_CD'] = $pnt->TRNSP_PNT_STS_TYPE_NM;
@@ -1405,8 +1709,29 @@ class Api extends \App\Page {
             $rec['LOC_ADDR'] = $pnt->ADDR;
             $rec['LOC_TGT_LAT'] = $pnt->LAT;
             $rec['LOC_TGT_LON'] = $pnt->LON;
+            $rec['LOC_TGT_TYPE_CD'] = $pnt->LOC_TGT_TYPE_CD;
             $rec['ORG_NM'] = $pnt->ORG_NM;
             $rec['ORG_TYPE_NM'] = $pnt->ORG_TYPE_NM;
+            //     if (!($role_transp->loaded() || $role_vendor->loaded())) {
+            $rec['SHOP_MARK'] = $pnt->MARK;
+            $rec['REL_STS_DTTM'] = $pnt->REL_STS_DTTM;
+            $rec['SHOP_COMMENT'] = $pnt->MARK_COMMENT;
+            /*  $pnt1 = $this->pixie->orm->get('pnt')->
+              where('TRNSP_PNT_ID', $pnt->TRNSP_PNT_ID)->find();
+              $claims = $pnt1->claims->find_all();
+              $carr = [];
+              $j = 0;
+              foreach ($claims as $claim) {
+
+              $res1 = [];
+              $res1['CLAIM_TYPE_CD'] = $claim->CLAIM_TYPE_CD;
+              $res1['CLAIM_TYPE_NM'] = $claim->claimtype->CLAIM_TYPE_NM;
+              $carr[$j] = $res1;
+              $j = $j + 1;
+              }
+
+              $rec['CLAIMS'] = $carr; */
+            //   }
             $res[$i] = $rec;
             $i = $i + 1;
         }
@@ -1507,6 +1832,54 @@ class Api extends \App\Page {
         $this->view->subview = 'apianswer';
     }
 
+    public function action_getclaimtypes() {
+
+        if ($this->view->message) {
+            return;
+        }
+
+        $role_shop = $this->user->roles->where('CODE', 'SHOP')->find();
+        $role_rc = $this->user->roles->where('CODE', 'RC')->find();
+        $role_admin = $this->user->roles->where('CODE', 'ADMIN')->find();
+
+        if (!($role_shop->loaded() || $role_admin->loaded() || $role_rc->loaded())) {
+            $this->view->message = json_encode(array('Error' => "You dont't have access to this method", 'Result' => 'getclaimtypes', 'Data' => ''));
+            return;
+        }
+
+        // $org = $this->user->org;
+        // if (!$org->loaded()) {
+        $pnt = $this->check_field('pnt_id', 'pnt', 'TRNSP_PNT_ID');
+        if (!is_object($pnt)) {
+            $this->view->message = json_encode(array('Error' => $pnt, 'Result' => 'driverrelease', 'Data' => ''));
+            return;
+        }
+
+        $orgtype = $pnt->loctgt->org->orgtype->ORG_TYPE_CD;
+        // die($orgtype);
+
+        if ($orgtype == 'RC') {
+            $marktype = 'RC_MARKS_TU';
+        } else if ($orgtype == 'SHOP') {
+            $marktype = 'SHOP_MARKS_TU';
+        } else {
+            $marktype = '';
+        }
+
+        $claimtypes = $this->pixie->orm->get('claimtype')
+                ->where('MARK_TYPE_CD', $marktype)
+                ->find_all();
+        // } else {
+        //     $roles = $this->pixie->orm->get('role')->
+        //             where('PARENT_CODE', 'TRANSPORT_COMPANY')->
+        //             find_all();
+        // }
+
+        $this->view->message = json_encode(array('Error' => '', 'Result' => 'getclaimtypes', 'Data' => $claimtypes->as_array(1)));
+
+        $this->view->subview = 'apianswer';
+    }
+
     public function action_getallroles() {
 
         if ($this->view->message) {
@@ -1519,18 +1892,17 @@ class Api extends \App\Page {
             return;
         }
 
-        $org = $this->user->org;
-
-        if (!$org->loaded()) {
-            $roles = $this->pixie->orm->get('role')->
-                    where('PARENT_CODE', 'ADMINLERUA')->
-                    where('or', array('PARENT_CODE', 'TRANSPORT_COMPANY'))->
-                    find_all();
-        } else {
-            $roles = $this->pixie->orm->get('role')->
-                    where('PARENT_CODE', 'TRANSPORT_COMPANY')->
-                    find_all();
-        }
+        // $org = $this->user->org;
+        // if (!$org->loaded()) {
+        $roles = $this->pixie->orm->get('role')->
+                where('PARENT_CODE', 'ADMINLERUA')->
+                where('or', array('PARENT_CODE', 'TRANSPORT_COMPANY'))->
+                find_all();
+        // } else {
+        //     $roles = $this->pixie->orm->get('role')->
+        //             where('PARENT_CODE', 'TRANSPORT_COMPANY')->
+        //             find_all();
+        // }
 
         $this->view->message = json_encode(array('Error' => '', 'Result' => 'getallroles', 'Data' => $roles->as_array(1)));
 

@@ -1,0 +1,4 @@
+cd /var/www/glarus
+git pull
+php ./composer.phar update -o  --prefer-dist
+

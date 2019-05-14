@@ -1,24 +1,27 @@
 {
-  "name": "phpixie/project",
-  "type": "project",
-  "description": "PHPixie skeleton project",
-  "license": "BSD",
-  "autoload": {
-    "psr-0": {"": "classes/"}
-  },
-  "require": {
-    "phpixie/core": "2.*@dev",
-    "phpixie/db": "2.*@dev",
-    "phpixie/orm": "2.*@dev",
-    "phpixie/auth": "2.*@dev",
-    "phpixie/email":"2.*@dev",
-    "zircote/swagger-php": "^2.0",
-    "denpa/php-bitcoinrpc": "^2.0",
-    "phpgangsta/googleauthenticator": "dev-master"
-  },
-  "extra": {
-    "branch-alias": {
-      "dev-master": "2.*-dev"
+    "name": "phpixie/project",
+    "type": "project",
+    "description": "PHPixie skeleton project",
+    "license": "BSD",
+    "autoload": {
+        "psr-0": {
+            "": "classes/"
+        }
+    },
+    "require": {
+        "phpixie/core": "2.*@dev",
+        "phpixie/db": "2.*@dev",
+        "phpixie/orm": "2.*@dev",
+        "phpixie/auth": "2.*@dev",
+        "phpixie/email": "2.*@dev",
+        "zircote/swagger-php": "^2.0",
+        "denpa/php-bitcoinrpc": "^2.0",
+        "phpgangsta/googleauthenticator": "dev-master",
+        "rbdwllr/reallysimplejwt": "^2.0"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "2.*-dev"
+        }
     }
-  }
 }

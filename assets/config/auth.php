@@ -1,4 +1,4 @@
-<?
+<?php
 return array(
     'default' => array(
         'model' => 'user',
