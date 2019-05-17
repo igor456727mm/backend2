@@ -1,0 +1,14 @@
+sudo apt update
+sudo apt install apache2
+sudo apt install php libapache2-mod-php php-mysql
+cd /var/www/
+sudo git clone https://ikozyrev3@bitbucket.org/glarusdigital/glarus_api_server.git glarus
+cd glarus
+sudo cp -f apache2.conf /etc/apache2/apache2.conf
+sudo cp -f 001-80.conf /etc/apache2/sites-enabled/001-80.conf
+sudo rm /etc/apache2/sites-enabled/000-default.conf
+sudo a2enmod rewrite
+sudo cp -f php.ini /etc/php/7.2/apache2/php.ini
+sudo apt-get install php-mbstring
+sudo systemctl restart apache2
+sudo php ./composer.phar update -o  --prefer-dist
