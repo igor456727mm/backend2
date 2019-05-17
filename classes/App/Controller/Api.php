@@ -1590,6 +1590,8 @@ class Api extends \App\Page {
     }
 
     public function action_getallpoints() {
+        
+        ini_set('memory_limit', '256000000');
 
         if ($this->view->message) {
             return;
