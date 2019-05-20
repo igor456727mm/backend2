@@ -650,7 +650,7 @@ class Api extends \App\Page {
 
             $transp_d = $this->pixie->orm->get('transp')->
                     where('TU', $tu)->pnts->
-                    where('and', array('TRNSP_PNT_STS_TYPE_CD', 'DELIVERED'))->
+                    where('and', array('TRNSP_PNT_STS_TYPE_CD',  'IN', $this->pixie->db->expr('("DELIVERED","RELEASED")')))->
                     find();
 
             if ($transp_d->loaded()) {
