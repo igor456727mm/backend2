@@ -57,6 +57,44 @@ class Api extends \App\Page {
         }
     }
 
+    public function action_getdashboards() {
+        if ($this->view->message) {
+            return;
+        }
+        $org_id = $this->user->org->id();
+        $dashboards = $this->user->org->orgtype->dashboards->find_all();
+        //$org=$this->user->org->find();
+        // die($dashboard_id);
+        $i=0;
+        foreach ($dashboards as $dashboard) {
+
+            if ($this->user->org->ORG_TYPE_CD == 'HEAD') {
+                $payload = [
+                    'resource' => ["dashboard" => intval($dashboard->METABASE_ID)],
+                    'params' => (Object) []
+                ];
+            } else {
+                $payload = [
+                    'resource' => ["dashboard" => intval($dashboard->METABASE_ID)],
+                    'params' => 
+                    //(Object) []
+                    ["ид_тк" => intval($org_id)]
+                ];
+            }
+            $secret = '3cf6553218a113836bb700289e6fd3bc7bbe1b5b871801a7f316d2df4f21620f';
+            $token = Token::customPayload($payload, $secret);
+            $link="https://analytics.dostavkalm.ru:8443/embed/dashboard/" . $token;
+            $res=[];
+            $res['link']=$link;
+            $res['name']=$dashboard->DASHBOARD_NM;
+            $rec[$i]=$res;
+            $i++;
+        }
+
+        $this->view->message = json_encode(array('Error' => '', 'Result' => 'getdashboards', 'Data' =>$rec));
+        $this->view->subview = 'apianswer';
+    }
+
     public function action_jwttoken() {
         if ($this->view->message) {
             return;
@@ -75,7 +113,8 @@ class Api extends \App\Page {
         } else {
             $payload = [
                 'resource' => ["dashboard" => intval($dashboard_id)],
-                'params' => ["ид_тк" => intval($org_id)]
+                'params' => (Object) []
+                    //["ид_тк" => intval($org_id)]
             ];
         }
         $secret = '3cf6553218a113836bb700289e6fd3bc7bbe1b5b871801a7f316d2df4f21620f';
@@ -650,7 +689,7 @@ class Api extends \App\Page {
 
             $transp_d = $this->pixie->orm->get('transp')->
                     where('TU', $tu)->pnts->
-                    where('and', array('TRNSP_PNT_STS_TYPE_CD',  'IN', $this->pixie->db->expr('("DELIVERED","RELEASED")')))->
+                    where('and', array('TRNSP_PNT_STS_TYPE_CD', 'IN', $this->pixie->db->expr('("DELIVERED","RELEASED")')))->
                     find();
 
             if ($transp_d->loaded()) {
@@ -1590,7 +1629,7 @@ class Api extends \App\Page {
     }
 
     public function action_getallpoints() {
-        
+
         ini_set('memory_limit', '256000000');
 
         if ($this->view->message) {

@@ -15,3 +15,5 @@ update glr_org_type set dashboard_id=69 where ORG_TYPE_CD='HEAD';
 insert into glr_org set ORG_ID=1, ORG_TYPE_CD='HEAD', ORG_STS_TYPE_CD='ACTIVE', ORG_NM='ООО "Леруа Мерлен Восток"';
 alter table mst_user_tab modify ORG_ID int default 1 null;
 update mst_user_tab set ORG_ID=1 where org_id is null;
+update glr_org_type set dashboard_id=101 where ORG_TYPE_CD='RC';
+update glr_org_type set dashboard_id=100 where ORG_TYPE_CD='SHOP';
