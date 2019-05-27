@@ -113,8 +113,9 @@ class Api extends \App\Page {
         } else {
             $payload = [
                 'resource' => ["dashboard" => intval($dashboard_id)],
-                'params' => (Object) []
-                    //["ид_тк" => intval($org_id)]
+                'params' => 
+                //(Object) []
+                ["ид_тк" => intval($org_id)]
             ];
         }
         $secret = '3cf6553218a113836bb700289e6fd3bc7bbe1b5b871801a7f316d2df4f21620f';
