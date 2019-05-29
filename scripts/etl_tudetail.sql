@@ -27,16 +27,31 @@ create table etl_raw_tu_detail (
 
 
 
+
+DROP TABLE glr_trnsp_accept;
+
+DROP TABLE glr_trnsp_accept_hst;
+
+DROP TABLE glr_trnsp_acptd_sts_type;
+
 CREATE TABLE glr_trnsp_accept
 (
 	TRNSP_ACCEPT_ID      INTEGER NOT NULL AUTO_INCREMENT,
 	TU                   VARCHAR(32) NULL,
 	ACCEPTED_STS_TYPE_CD VARCHAR(32) NULL,
 	ORG_ID               INTEGER NULL,
-	ACCEPTED_TIME        DATETIME NULL,
+	ACCEPTED_DTTM        DATETIME NULL,
 	RC                   VARCHAR(255) NULL,
 	SHOP                 VARCHAR(255) NULL,
 	PRIMARY KEY (TRNSP_ACCEPT_ID)
+);
+
+CREATE UNIQUE INDEX XAK1gle_trnsp_pnt_accept ON glr_trnsp_accept
+(
+	TU ASC,
+	ORG_ID ASC,
+	RC ASC,
+	SHOP ASC
 );
 
 CREATE TABLE glr_trnsp_accept_hst
@@ -46,10 +61,20 @@ CREATE TABLE glr_trnsp_accept_hst
 	RC                   VARCHAR(255) NULL,
 	SHOP                 VARCHAR(255) NULL,
 	TRNSP_ACCEPT_HST_ID  INTEGER NOT NULL AUTO_INCREMENT,
-	TRNSP_PNT_MARK_FROM  TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-	TRNSP_PNT_MARK_TO    TIMESTAMP NULL,
-	ORG_ID               INTEGER NULL,
+	TRNSP_ACCEPT_FROM    TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+	TRNSP_ACCEPT_TO      TIMESTAMP NULL,
+	ORG_ID               INTEGER NOT NULL,
 	PRIMARY KEY (TRNSP_ACCEPT_HST_ID)
+);
+
+CREATE UNIQUE INDEX XAK1glr_trnsp_accept_hst ON glr_trnsp_accept_hst
+(
+	TU ASC,
+	RC ASC,
+	SHOP ASC,
+	ORG_ID ASC,
+	ACCEPTED_STS_TYPE_CD ASC,
+	TRNSP_ACCEPT_FROM ASC
 );
 
 CREATE TABLE glr_trnsp_acptd_sts_type
@@ -70,8 +95,6 @@ ADD FOREIGN KEY (ACCEPTED_STS_TYPE_CD) REFERENCES glr_trnsp_acptd_sts_type (ACCE
 ALTER TABLE glr_trnsp_accept_hst
 ADD FOREIGN KEY (ORG_ID) REFERENCES glr_org (ORG_ID);
 
-
-insert into glr_trnsp_acptd_sts_type SELECT distinct `ACCEPTED` FROM `etl_raw_tu_detail` WHERE 1;
 
 create view etl_glr_trnsp_accept as 
  select 

@@ -1,13 +1,4 @@
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-/**
- * Author:  ik186005
- * Created: May 24, 2019
- */
-
+drop view glr_all_points_anl;
 CREATE VIEW 
  `glr_all_points_anl` 
 AS 
@@ -37,4 +28,4 @@ from
 where 
  ((`p`.`TRNSP_ID` = `t`.`TRNSP_ID`) and
   (`lt`.`LOC_ID` = `p`.`LOC_TGT_ID`) and
-  (`s`.`TRNSP_PNT_STS_TYPE_CD` = `p`.`TRNSP_PNT_STS_TYPE_CD`) and (`o`.`ORG_ID` = `t`.`ORG_ID`) and (`s`.`TRNSP_PNT_STS_TYPE_NM` = 'Доставлен')) | utf8                 | utf8_general_ci  
+  (`s`.`TRNSP_PNT_STS_TYPE_CD` = `p`.`TRNSP_PNT_STS_TYPE_CD`) and (`o`.`ORG_ID` = `t`.`ORG_ID`) and (`s`.`TRNSP_PNT_STS_TYPE_CD` in ('DELIVERED','RELEASED')));
