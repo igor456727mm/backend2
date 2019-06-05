@@ -1687,13 +1687,14 @@ class Api extends \App\Page {
                     where('and', array('LOC_PLAN_DTTM', '<=', $date_to))->
                     find_all();
         } else if ($role_rc->loaded()) {
+            $pnts = $org->getallpoints_rc($date_from, $date_to);
             //$pnts = $this->pixie->orm->get('org')->where('ORG_TYPE_CD','RC')->loc->pnts->find_all();
-            $pnts = $this->pixie->orm->get('pntall')->
+           /* $pnts = $this->pixie->orm->get('pntall')->
                     where('ORG_SRC_ID', $org->id())->
                     where('or', array('ORG_TGT_ID', $org->id()))->
                     where('and', array('LOC_PLAN_DTTM', '>=', $date_from))->
                     where('and', array('LOC_PLAN_DTTM', '<=', $date_to))->
-                    find_all();
+                    find_all();*/
             //$pnts = $org->getallpoints($date_from, $date_to);
         } else if ($role_shop->loaded()) {
             $pnts = $org->getallpoints($date_from, $date_to);

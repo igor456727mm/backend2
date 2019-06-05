@@ -40,5 +40,19 @@ class Org extends \PHPixie\ORM\Model {
         //die($qry);
         return $res;
     }
+    
+        public function getallpoints_rc($date_from, $date_to) {
+        $org_id = $this->id();
+        if ($date_from != '') {
+            $date_filter = " and LOC_PLAN_DTTM>='$date_from'";
+        }
+        if ($date_to != '') {
+            $date_filter = $date_filter . " and LOC_PLAN_DTTM<='$date_to'";
+        }
+        $qry = "select * from glr_allpoints a where  (ORG_TGT_ID=$org_id or ORG_SRC_ID=$org_id)" . $date_filter;
+        $res = $this->conn->execute($qry);
+        //die($qry);
+        return $res;
+    }
 
 }
