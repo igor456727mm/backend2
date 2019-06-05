@@ -65,7 +65,7 @@ class Api extends \App\Page {
         $dashboards = $this->user->org->orgtype->dashboards->find_all();
         //$org=$this->user->org->find();
         // die($dashboard_id);
-        $i=0;
+        $i = 0;
         foreach ($dashboards as $dashboard) {
 
             if ($this->user->org->ORG_TYPE_CD == 'HEAD') {
@@ -76,22 +76,22 @@ class Api extends \App\Page {
             } else {
                 $payload = [
                     'resource' => ["dashboard" => intval($dashboard->METABASE_ID)],
-                    'params' => 
+                    'params' =>
                     //(Object) []
-                    ["ид_тк" => intval($org_id)]
+                        ["ид_тк" => intval($org_id)]
                 ];
             }
             $secret = '3cf6553218a113836bb700289e6fd3bc7bbe1b5b871801a7f316d2df4f21620f';
             $token = Token::customPayload($payload, $secret);
-            $link="https://analytics.dostavkalm.ru:8443/embed/dashboard/" . $token;
-            $res=[];
-            $res['link']=$link;
-            $res['name']=$dashboard->DASHBOARD_NM;
-            $rec[$i]=$res;
+            $link = "https://analytics.dostavkalm.ru:8443/embed/dashboard/" . $token;
+            $res = [];
+            $res['link'] = $link;
+            $res['name'] = $dashboard->DASHBOARD_NM;
+            $rec[$i] = $res;
             $i++;
         }
 
-        $this->view->message = json_encode(array('Error' => '', 'Result' => 'getdashboards', 'Data' =>$rec));
+        $this->view->message = json_encode(array('Error' => '', 'Result' => 'getdashboards', 'Data' => $rec));
         $this->view->subview = 'apianswer';
     }
 
@@ -113,9 +113,9 @@ class Api extends \App\Page {
         } else {
             $payload = [
                 'resource' => ["dashboard" => intval($dashboard_id)],
-                'params' => 
+                'params' =>
                 //(Object) []
-                ["ид_тк" => intval($org_id)]
+                    ["ид_тк" => intval($org_id)]
             ];
         }
         $secret = '3cf6553218a113836bb700289e6fd3bc7bbe1b5b871801a7f316d2df4f21620f';
@@ -1691,6 +1691,8 @@ class Api extends \App\Page {
             $pnts = $this->pixie->orm->get('pntall')->
                     where('ORG_SRC_ID', $org->id())->
                     where('or', array('ORG_TGT_ID', $org->id()))->
+                    where('and', array('LOC_PLAN_DTTM', '>=', $date_from))->
+                    where('and', array('LOC_PLAN_DTTM', '<=', $date_to))->
                     find_all();
             //$pnts = $org->getallpoints($date_from, $date_to);
         } else if ($role_shop->loaded()) {
