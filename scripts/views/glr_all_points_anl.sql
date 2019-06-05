@@ -11,6 +11,7 @@ select
  `p`.`STS_DTTM` AS `STS_DTTM`,
  `ls`.`LOC_NM` AS `LOC_SRC_NM`,
  `lt`.`LOC_NM` AS `LOC_TGT_NM`,
+  if(`ls`.`LOC_NM` is null,`lt`.`LOC_NM`,`ls`.`LOC_NM`) as RC,
  `lt`.`ADDR` AS `ADDR`,
  `lt`.`LAT` AS `LAT`,
  `lt`.`LON` AS `LON`,

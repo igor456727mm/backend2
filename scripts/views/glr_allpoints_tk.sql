@@ -7,9 +7,9 @@
  * Author:  ik186005
  * Created: Apr 27, 2019
  */
-drop view glr_allpoints;
+drop view glr_allpoints_tk;
 CREATE VIEW 
-`glr_allpoints` 
+`glr_allpoints_tk` 
 AS 
  select 
 `t`.`TU` AS `TU`,
@@ -27,6 +27,7 @@ AS
 `lt`.`LON` AS `LON`,
 `o`.`ORG_NM` AS `ORG_NM`,
 `o`.`ORG_ID` AS `ORG_ID`,
+`ot`.`ORG_TYPE_CD` AS `ORG_TYPE_CD`,
 `ot`.`ORG_TYPE_NM` AS `ORG_TYPE_NM`,
 `lt`.`LOC_TYPE_CODE` AS `LOC_TGT_TYPE_CD`,
 `t`.`TRNSP_ID` AS `TRNSP_ID`,
@@ -44,4 +45,7 @@ from
   join `glr_trnsp_pnt_sts_type` `s` on `s`.`TRNSP_PNT_STS_TYPE_CD` = `p`.`TRNSP_PNT_STS_TYPE_CD`
   join `glr_org` `o` on `o`.`ORG_ID` = `t`.`ORG_ID`
   join `glr_org_type` `ot` on `o`.`ORG_TYPE_CD` = `ot`.`ORG_TYPE_CD`
-  left join glr_trnsp_pnt_mark m on m.TRNSP_PNT_ID=p.TRNSP_PNT_ID and MARK_TYPE_CD in ('SHOP_MARKS_TU','RC_MARKS_TU');
+  left join glr_trnsp_pnt_mark m on m.TRNSP_PNT_ID=p.TRNSP_PNT_ID and MARK_TYPE_CD in ('SHOP_MARKS_TU','RC_MARKS_TU')
+where
+  `o`.`ORG_TYPE_CD`<>'VENDOR';
+  
