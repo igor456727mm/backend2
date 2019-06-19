@@ -1978,10 +1978,10 @@ class Api extends \App\Page {
         foreach ($pntstshis as $pntsts) {
             $rec=[];
             $rec['PNT_ID']=$pnt->id();
-          //  $rec['USER']=$pntsts->user->EMAIL;
+            $rec['USER']=$pntsts->user->EMAIL;
           //  $rec['IP']=$pntsts->user->usertokens->where($pntsts->TRNSP_PNT_STS_FROM);
             $rec['LOG_DTTM']=$pntsts->TRNSP_PNT_STS_FROM;
-            $rec['MESSAGE']='Пользователь '.$pntsts->user->EMAIL.' изменил статус на '.$pntsts->status->TRNSP_PNT_STS_TYPE_NM ;
+            $rec['MESSAGE']=' Изменил статус на '.$pntsts->status->TRNSP_PNT_STS_TYPE_NM ;
            // $rec['TRNSP_PNT_STS_TYPE_CD']=$pntsts->TRNSP_PNT_STS_TYPE_CD;
            // $rec['STS_DTTM']=$pntsts->STS_DTTM;
             $res[$i]=$rec;
