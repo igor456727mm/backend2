@@ -970,7 +970,7 @@ class Api extends \App\Page {
             return;
         }
 
-        $role = $this->user->roles->where('CODE', 'IN', $this->pixie->db->expr('("ADMIN","ADMIN_LIGHT")'))->find();
+        $role = $this->user->roles->where('CODE', 'IN', $this->pixie->db->expr('("ADMIN")'))->find();
         if (!$role->loaded()) {
             $this->view->message = json_encode(array('Error' => "You dont't have access to this method", 'Result' => 'reguser', 'Data' => ''));
             return;
@@ -995,7 +995,7 @@ class Api extends \App\Page {
             return;
         }
 
-        if (($role != 'ADMIN') && ($role != 'TRANSPORT_COMPANY') && ($role != 'RC') && ($role != 'VENDOR') && ($role != 'SHOP')) {
+        if (($role != 'ADMIN') && ($role != 'ADMIN_LIGHT') &&  ($role != 'TRANSPORT_COMPANY') && ($role != 'RC') && ($role != 'VENDOR') && ($role != 'SHOP')) {
             $this->view->message = json_encode(array('Error' => 'Role is wrong', 'Result' => 'reguser', 'Data' => ''));
             return;
         }
