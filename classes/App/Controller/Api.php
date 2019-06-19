@@ -995,7 +995,7 @@ class Api extends \App\Page {
             return;
         }
 
-        if (($role != 'ADMIN') && ($role != 'ADMIN_LIGHT') &&  ($role != 'TRANSPORT_COMPANY') && ($role != 'RC') && ($role != 'VENDOR') && ($role != 'SHOP')) {
+        if (($role != 'ADMIN') && ($role != 'ADMIN_LIGHT') && ($role != 'TRANSPORT_COMPANY') && ($role != 'RC') && ($role != 'VENDOR') && ($role != 'SHOP')) {
             $this->view->message = json_encode(array('Error' => 'Role is wrong', 'Result' => 'reguser', 'Data' => ''));
             return;
         }
@@ -1689,12 +1689,12 @@ class Api extends \App\Page {
         } else if ($role_rc->loaded()) {
             $pnts = $org->getallpoints_rc($date_from, $date_to);
             //$pnts = $this->pixie->orm->get('org')->where('ORG_TYPE_CD','RC')->loc->pnts->find_all();
-           /* $pnts = $this->pixie->orm->get('pntall')->
-                    where('ORG_SRC_ID', $org->id())->
-                    where('or', array('ORG_TGT_ID', $org->id()))->
-                    where('and', array('LOC_PLAN_DTTM', '>=', $date_from))->
-                    where('and', array('LOC_PLAN_DTTM', '<=', $date_to))->
-                    find_all();*/
+            /* $pnts = $this->pixie->orm->get('pntall')->
+              where('ORG_SRC_ID', $org->id())->
+              where('or', array('ORG_TGT_ID', $org->id()))->
+              where('and', array('LOC_PLAN_DTTM', '>=', $date_from))->
+              where('and', array('LOC_PLAN_DTTM', '<=', $date_to))->
+              find_all(); */
             //$pnts = $org->getallpoints($date_from, $date_to);
         } else if ($role_shop->loaded()) {
             $pnts = $org->getallpoints($date_from, $date_to);
@@ -1950,6 +1950,45 @@ class Api extends \App\Page {
         // }
 
         $this->view->message = json_encode(array('Error' => '', 'Result' => 'getallroles', 'Data' => $roles->as_array(1)));
+
+        $this->view->subview = 'apianswer';
+    }
+
+    public function action_getpnthst() {
+
+        if ($this->view->message) {
+            return;
+        }
+
+        $role = $this->user->roles->where('CODE', 'IN', $this->pixie->db->expr('("ADMIN","ADMIN_LIGHT")'))->find();
+        if (!$role->loaded()) {
+            $this->view->message = json_encode(array('Error' => "You dont't have access to this method", 'Result' => 'reguser', 'Data' => ''));
+            return;
+        }
+        $pnt = $this->check_field('pnt_id', 'pnt', 'trnsp_pnt_id');
+        if (!is_object($pnt)) {
+            $this->view->message = json_encode(array('Error' => $pnt, 'Result' => 'getpnthst', 'Data' => ''));
+            return;
+        }
+
+
+        $pntstshis = $pnt->stshis->find_all();
+        $res=[];
+        $i=0;
+        foreach ($pntstshis as $pntsts) {
+            $rec=[];
+            $rec['PNT_ID']=$pnt->id();
+          //  $rec['USER']=$pntsts->user->EMAIL;
+          //  $rec['IP']=$pntsts->user->usertokens->where($pntsts->TRNSP_PNT_STS_FROM);
+            $rec['LOG_DTTM']=$pntsts->TRNSP_PNT_STS_FROM;
+            $rec['MESSAGE']='Пользователь '.$pntsts->user->EMAIL.' изменил статус на '.$pntsts->status->TRNSP_PNT_STS_TYPE_NM ;
+           // $rec['TRNSP_PNT_STS_TYPE_CD']=$pntsts->TRNSP_PNT_STS_TYPE_CD;
+           // $rec['STS_DTTM']=$pntsts->STS_DTTM;
+            $res[$i]=$rec;
+            $i=$i+1;
+        }
+
+        $this->view->message = json_encode(array('Error' => '', 'Result' => 'getpnthst', 'Data' => $res));
 
         $this->view->subview = 'apianswer';
     }

@@ -13,6 +13,14 @@ class Pntstshis extends \PHPixie\ORM\Model {
             'model' => 'pnt',
             'key' => 'TRNSP_PNT_ID'
         ),
+        'user' => array(
+            'model' => 'user',
+            'key' => 'USER_ID'
+        ),
+        'status' => array(
+            'model' => 'pntsts',
+            'key' => 'TRNSP_PNT_STS_TYPE_CD'
+        )
     );
 
 }
