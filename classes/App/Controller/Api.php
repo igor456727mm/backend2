@@ -323,7 +323,7 @@ class Api extends \App\Page {
             return;
         }
 
-        $role = $this->user->roles->where('CODE', 'ADMIN')->find();
+        $role = $this->user->roles->where('CODE', 'IN', $this->pixie->db->expr('("ADMIN","ADMIN_LIGHT")'))->find();
         if (!$role->loaded()) {
             $this->view->message = json_encode(array('Error' => "You dont't have access to this method", 'Result' => 'getuseractivationlink', 'Data' => ''));
             return;
@@ -928,7 +928,7 @@ class Api extends \App\Page {
             return;
         }
 
-        $role = $this->user->roles->where('CODE', 'ADMIN')->find();
+        $role = $this->user->roles->where('CODE', 'IN', $this->pixie->db->expr('("ADMIN","ADMIN_LIGHT")'))->find();
         if (!$role->loaded()) {
             $this->view->message = json_encode(array('Error' => "You dont't have access to this method", 'Result' => 'getroles', 'Data' => ''));
             return;
@@ -970,7 +970,7 @@ class Api extends \App\Page {
             return;
         }
 
-        $role = $this->user->roles->where('CODE', 'ADMIN')->find();
+        $role = $this->user->roles->where('CODE', 'IN', $this->pixie->db->expr('("ADMIN")'))->find();
         if (!$role->loaded()) {
             $this->view->message = json_encode(array('Error' => "You dont't have access to this method", 'Result' => 'reguser', 'Data' => ''));
             return;
@@ -995,7 +995,7 @@ class Api extends \App\Page {
             return;
         }
 
-        if (($role != 'ADMIN') && ($role != 'TRANSPORT_COMPANY') && ($role != 'RC') && ($role != 'VENDOR') && ($role != 'SHOP')) {
+        if (($role != 'ADMIN') && ($role != 'ADMIN_LIGHT') &&  ($role != 'TRANSPORT_COMPANY') && ($role != 'RC') && ($role != 'VENDOR') && ($role != 'SHOP')) {
             $this->view->message = json_encode(array('Error' => 'Role is wrong', 'Result' => 'reguser', 'Data' => ''));
             return;
         }
@@ -1457,7 +1457,7 @@ class Api extends \App\Page {
             return;
         }
 
-        $role_admin = $this->user->roles->where('CODE', 'ADMIN')->find();
+        $role_admin = $this->user->roles->where('CODE', 'IN', $this->pixie->db->expr('("ADMIN","ADMIN_LIGHT")'))->find();
         $role_shop = $this->user->roles->where('CODE', 'SHOP')->find();
         $role_rc = $this->user->roles->where('CODE', 'RC')->find();
         $role_vendor = $this->user->roles->where('CODE', 'VENDOR')->find();
@@ -1540,7 +1540,7 @@ class Api extends \App\Page {
             return;
         }
 
-        $role = $this->user->roles->where('CODE', 'ADMIN')->find();
+        $role = $this->user->roles->where('CODE', 'IN', $this->pixie->db->expr('("ADMIN","ADMIN_LIGHT")'))->find();
         if (!$role->loaded()) {
             $this->view->message = json_encode(array('Error' => "You dont't have access to this method", 'Result' => 'getusers', 'Data' => ''));
             return;
@@ -1638,7 +1638,7 @@ class Api extends \App\Page {
         }
 
         $role_admin = $this->user->roles->
-                where('CODE', 'ADMIN')->
+                where('CODE', 'IN', $this->pixie->db->expr('("ADMIN","ADMIN_LIGHT")'))->
                 find();
         $role_transp = $this->user->roles->
                 where('CODE', 'TRANSPORT_COMPANY')->
@@ -1792,7 +1792,7 @@ class Api extends \App\Page {
             return;
         }
 
-        $role = $this->user->roles->where('CODE', 'ADMIN')->find();
+        $role = $this->user->roles->where('CODE', 'IN', $this->pixie->db->expr('("ADMIN","ADMIN_LIGHT")'))->find();
         if (!$role->loaded()) {
             $this->view->message = json_encode(array('Error' => "You dont't have access to this method", 'Result' => 'getalllocs', 'Data' => ''));
             return;
@@ -1812,7 +1812,7 @@ class Api extends \App\Page {
             return;
         }
 
-        $role = $this->user->roles->where('CODE', 'ADMIN')->find();
+        $role = $this->user->roles->where('CODE', 'IN', $this->pixie->db->expr('("ADMIN","ADMIN_LIGHT")'))->find();
         if (!$role->loaded()) {
             $this->view->message = json_encode(array('Error' => "You dont't have access to this method", 'Result' => 'getloadlogs', 'Data' => ''));
             return;
@@ -1838,7 +1838,7 @@ class Api extends \App\Page {
             return;
         }
 
-        $role = $this->user->roles->where('CODE', 'ADMIN')->find();
+        $role = $this->user->roles->where('CODE', 'IN', $this->pixie->db->expr('("ADMIN","ADMIN_LIGHT")'))->find();
         if (!$role->loaded()) {
             $this->view->message = json_encode(array('Error' => "You dont't have access to this method", 'Result' => 'getloadsessions', 'Data' => ''));
             return;
@@ -1857,7 +1857,7 @@ class Api extends \App\Page {
             return;
         }
 
-        $role = $this->user->roles->where('CODE', 'ADMIN')->find();
+        $role = $this->user->roles->where('CODE', 'IN', $this->pixie->db->expr('("ADMIN","ADMIN_LIGHT")'))->find();
         if (!$role->loaded()) {
             $this->view->message = json_encode(array('Error' => "You dont't have access to this method", 'Result' => 'getuserlogs', 'Data' => ''));
             return;
@@ -1885,7 +1885,7 @@ class Api extends \App\Page {
 
         $role_shop = $this->user->roles->where('CODE', 'SHOP')->find();
         $role_rc = $this->user->roles->where('CODE', 'RC')->find();
-        $role_admin = $this->user->roles->where('CODE', 'ADMIN')->find();
+        $role_admin = $this->user->roles->where('CODE', 'IN', $this->pixie->db->expr('("ADMIN","ADMIN_LIGHT")'))->find();
 
         if (!($role_shop->loaded() || $role_admin->loaded() || $role_rc->loaded())) {
             $this->view->message = json_encode(array('Error' => "You dont't have access to this method", 'Result' => 'getclaimtypes', 'Data' => ''));
@@ -1931,7 +1931,7 @@ class Api extends \App\Page {
             return;
         }
 
-        $role = $this->user->roles->where('CODE', 'ADMIN')->find();
+        $role = $this->user->roles->where('CODE', 'IN', $this->pixie->db->expr('("ADMIN","ADMIN_LIGHT")'))->find();
         if (!$role->loaded()) {
             $this->view->message = json_encode(array('Error' => "You dont't have access to this method", 'Result' => 'getallroles', 'Data' => ''));
             return;
@@ -1960,7 +1960,7 @@ class Api extends \App\Page {
             return;
         }
 
-        $role = $this->user->roles->where('CODE', 'ADMIN')->find();
+        $role = $this->user->roles->where('CODE', 'IN', $this->pixie->db->expr('("ADMIN","ADMIN_LIGHT")'))->find();
         if (!$role->loaded()) {
             $this->view->message = json_encode(array('Error' => "You dont't have access to this method", 'Result' => 'reguser', 'Data' => ''));
             return;
@@ -2023,7 +2023,7 @@ class Api extends \App\Page {
         if ($this->view->message) {
             return;
         }
-        $role = $this->user->roles->where('CODE', 'ADMIN')->find();
+        $role = $this->user->roles->where('CODE', 'IN', $this->pixie->db->expr('("ADMIN","ADMIN_LIGHT")'))->find();
         if (!$role->loaded()) {
             $this->view->message = json_encode(array('Error' => "You dont't have access to this method", 'Result' => 'getallorgs', 'Data' => ''));
             return;

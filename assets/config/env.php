@@ -6,6 +6,6 @@
  * and open the template in the editor.
  */
 
-$site_url='https://www.dostavkalm.ru';
-$mode ='prod';
+$site_url='https://www.testdostavkalm.ru';
+$mode ='test';
 $site_email='info@dostavkalm.ru';
