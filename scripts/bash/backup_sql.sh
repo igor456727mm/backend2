@@ -44,11 +44,11 @@
 # Modify below variables to fit your need ----
 #########################################################
 # Keep backup for how many days. Default is 90 days.
-KEEP_DAYS='1'
+KEEP_DAYS='3'
 # Where to store backup copies.
 export BACKUP_ROOTDIR="/root/backup"
 # MySQL username. Root user is required to dump all databases.
-export MYSQL_ROOT_USER='root'
+export MYSQL_ROOT_USER='ikozyr9w_dh'
 # ~/.my.cnf
 export MYSQL_DOT_MY_CNF='/root/.my.cnf'
 # Databases we should backup.
@@ -63,11 +63,12 @@ export DB_CHARACTER_SET="utf8"
 export PATH='/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/local/sbin'
 # Commands.
 export CMD_DATE='/bin/date'
-export CMD_DU='du -sh'
+export CMD_DU='du -s'
 export CMD_COMPRESS='gzip'
 export COMPRESS_SUFFIX='gz'
-export CMD_MYSQL="mysql --defaults-file=${MYSQL_DOT_MY_CNF} -u${MYSQL_ROOT_USER}"
-export CMD_MYSQLDUMP="mysqldump --defaults-file=${MYSQL_DOT_MY_CNF} -u${MYSQL_ROOT_USER} --events --ignore-table=mysql.event --default-character-set=${DB_CHARACTER_SET} --skip-comments"
+export CMD_MYSQL="mysql --defaults-file=${MYSQL_DOT_MY_CNF} -h 95.214.62.239 -u${MYSQL_ROOT_USER}"
+export CMD_MYSQL_SLAVE="mysql --defaults-file=${MYSQL_DOT_MY_CNF} -h 95.214.63.47 -u${MYSQL_ROOT_USER}"
+export CMD_MYSQLDUMP="mysqldump --defaults-file=${MYSQL_DOT_MY_CNF} -h 95.214.63.47  -u${MYSQL_ROOT_USER} --single-transaction --routines --events --ignore-table=mysql.event --default-character-set=${DB_CHARACTER_SET} --skip-comments"
 # Date.
 export YEAR="$(${CMD_DATE} +%Y)"
 export MONTH="$(${CMD_DATE} +%m)"
@@ -122,10 +123,12 @@ for db in ${DATABASES}; do
     ${CMD_MYSQL} -e "USE ${db}" &>/dev/null
 
     if [ X"$?" == X'0' ]; then
+        # Stop slave
+        ${CMD_MYSQL_SLAVE} -e "STOP SLAVE" &>/dev/null
         # Dump
         ${CMD_MYSQLDUMP} ${db} > ${output_sql}
         chmod 0400 ${output_sql}
-
+       
         if [ X"$?" == X'0' ]; then
             # Get original SQL file size
             original_size="$(${CMD_DU} ${output_sql} | awk '{print $1}')"
@@ -141,12 +144,14 @@ for db in ${DATABASES}; do
             # Get compressed file size
             compressed_file_name="${output_sql}.${COMPRESS_SUFFIX}"
             compressed_size="$(${CMD_DU} ${compressed_file_name} | awk '{print $1}')"
-            sql_log_msg="INSERT INTO log (event, loglevel, msg, admin, ip, timestamp) VALUES ('backup', 'info', 'Database: ${db}, size: ${compressed_size} (original: ${original_size})', 'cron_backup_sql', '127.0.0.1', UTC_TIMESTAMP());"
+            sql_log_msg="INSERT INTO log (event, loglevel, msg, admin, ip, timestamp,db,db_size,db_original_size) VALUES ('backup', 'info', 'Database: ${db}, size: ${compressed_size} (original: ${original_size})', 'cron_backup_sql', '127.0.0.1', UTC_TIMESTAMP(),  '${db}', '${compressed_size}','${original_size}');"
         else
             # backup failed
             export BACKUP_SUCCESS='NO'
             sql_log_msg="INSERT INTO log (event, loglevel, msg, admin, ip, timestamp) VALUES ('backup', 'info', 'Database backup failed: ${db}. Log: $(cat ${LOGFILE})', 'cron_backup_sql', '127.0.0.1', UTC_TIMESTAMP());"
         fi
+        # Start slave
+        ${CMD_MYSQL_SLAVE} -e "START SLAVE" &>/dev/null
 
         # Log to SQL table `iredadmin.log`, so that global domain admins can
         # check backup status (System -> Admin Log)
