@@ -1,0 +1,2 @@
+puttygen privatekey.ppk -O private-openssh -o privatekey.pem
+ssh -i privatekey.pem user@my.server.com
