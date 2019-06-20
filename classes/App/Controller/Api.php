@@ -1973,19 +1973,33 @@ class Api extends \App\Page {
 
 
         $pntstshis = $pnt->stshis->find_all();
-        $res=[];
-        $i=0;
+        $res = [];
+        $i = 0;
         foreach ($pntstshis as $pntsts) {
-            $rec=[];
-            $rec['PNT_ID']=$pnt->id();
-            $rec['USER']=$pntsts->user->EMAIL;
-          //  $rec['IP']=$pntsts->user->usertokens->where($pntsts->TRNSP_PNT_STS_FROM);
-            $rec['LOG_DTTM']=$pntsts->TRNSP_PNT_STS_FROM;
-            $rec['MESSAGE']=' Изменил статус на '.$pntsts->status->TRNSP_PNT_STS_TYPE_NM ;
-           // $rec['TRNSP_PNT_STS_TYPE_CD']=$pntsts->TRNSP_PNT_STS_TYPE_CD;
-           // $rec['STS_DTTM']=$pntsts->STS_DTTM;
-            $res[$i]=$rec;
-            $i=$i+1;
+            $rec = [];
+            $rec['PNT_ID'] = $pnt->id();
+            $rec['USER'] = $pntsts->user->EMAIL;
+            //  $rec['IP']=$pntsts->user->usertokens->where($pntsts->TRNSP_PNT_STS_FROM);
+            $rec['LOG_DTTM'] = $pntsts->TRNSP_PNT_STS_FROM;
+            $rec['MESSAGE'] = ' Изменил статус на ' . $pntsts->status->TRNSP_PNT_STS_TYPE_NM;
+            // $rec['TRNSP_PNT_STS_TYPE_CD']=$pntsts->TRNSP_PNT_STS_TYPE_CD;
+            // $rec['STS_DTTM']=$pntsts->STS_DTTM;
+            $res[$i] = $rec;
+            $i = $i + 1;
+        }
+
+        $pntmarkhis = $pnt->markhis->find_all();
+        foreach ($pntmarkhis as $markhis) {
+            $rec = [];
+            $rec['PNT_ID'] = $pnt->id();
+            $rec['USER'] = $markhis->user->EMAIL;
+            //  $rec['IP']=$pntsts->user->usertokens->where($pntsts->TRNSP_PNT_STS_FROM);
+            $rec['LOG_DTTM'] = $markhis->TRNSP_PNT_MARK_FROM;
+            $rec['MESSAGE'] = ' Изменил оценку на ' . $markhis->MARK;
+            // $rec['TRNSP_PNT_STS_TYPE_CD']=$pntsts->TRNSP_PNT_STS_TYPE_CD;
+            // $rec['STS_DTTM']=$pntsts->STS_DTTM;
+            $res[$i] = $rec;
+            $i = $i + 1;
         }
 
         $this->view->message = json_encode(array('Error' => '', 'Result' => 'getpnthst', 'Data' => $res));

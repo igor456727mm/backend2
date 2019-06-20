@@ -13,6 +13,10 @@ class Pntmarkhis extends \PHPixie\ORM\Model {
             'model' => 'pnt',
             'key' => 'TRNSP_PNT_ID'
         ),
+        'user' => array(
+            'model' => 'user',
+            'key' => 'USER_ID'
+        )
     );
 
 }
