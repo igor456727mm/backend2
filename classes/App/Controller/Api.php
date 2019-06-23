@@ -373,6 +373,9 @@ class Api extends \App\Page {
             $this->view->message = json_encode(array('Error' => 'User not found', 'Result' => 'addrole', 'Data' => ''));
         } else {
             $user->add('roles', $role);
+            if ($role->CODE=='ADMIN') {
+                $user->remove('org',$role);
+            }
             $this->view->message = json_encode(array('Error' => '', 'Result' => 'addrole', 'Data' => 'Роль добавлена.'));
         }
 
@@ -478,7 +481,7 @@ class Api extends \App\Page {
 " .
                 $site_url . '/restore.xhtml?rc=' . $rc . "
 " . "Нужна помощь?" . "
-" . "+7-903-665-36-09| Telegram Доставка в магазины ЛМ: поддержка" . "
+" . "+7-800-600-82-02| Telegram Доставка в магазины ЛМ: поддержка" . "
 " . "© 2019 dostavkalm.ru " . "
 " . "Авторские права защищены.");
 
@@ -1037,7 +1040,7 @@ class Api extends \App\Page {
 " .
                     $site_url . '/activate.xhtml?uid=' . $user->act_key . "
 " . "Нужна помощь?" . "
-" . "+7-903-665-40-52" . "
+" . "+7-800-600-82-02" . "
 " . "© 2019 dostavkalm.ru " . "
 " . "Авторские права защищены.");
 
@@ -1090,7 +1093,7 @@ class Api extends \App\Page {
 " .
                     $site_url . '/activate.xhtml?uid=' . $user->ACT_KEY . "
 " . "Нужна помощь?" . "
-" . "+7-903-665-40-52" . "
+" . "+7-800-600-82-02" . "
 " . "© 2019 dostavkalm.ru " . "
 " . "Авторские права защищены.");
 

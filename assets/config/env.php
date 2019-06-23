@@ -7,5 +7,5 @@
  */
 
 $site_url='https://www.testdostavkalm.ru';
-$mode ='test';
+$mode ='dev';
 $site_email='info@dostavkalm.ru';

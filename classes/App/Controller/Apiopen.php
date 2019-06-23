@@ -62,7 +62,7 @@ class Apiopen extends \App\Page {
             require '../assets/config/env.php';
             $res = $this->pixie->email->send($user_ident->EMAIL,array($site_email => "Доставка ЛМ"), "Доставка в магазины Леруа Мерлен - ваш пароль изменен", "Вы изменили пароль на сайте dostavkalm.ru
 " . "Нужна помощь?" . "
-" . "+7-903-665-40-52" . "
+" . "+7-800-600-82-02" . "
 " . "© 2019 dostavkalm.ru " . "
 " . "Авторские права защищены.");
             
@@ -117,7 +117,7 @@ class Apiopen extends \App\Page {
 " .
                         $site_url . '/restore.xhtml?rc=' . $restore_code . "
 " . "Нужна помощь?" . "
-" . "+7-903-665-40-52" . "
+" . "+7-800-600-82-02" . "
 " . "© 2019 dostavkalm.ru " . "
 " . "Авторские права защищены.");
                 $this->view->message = json_encode(array('Error' => '', 'Result' => 'restorepsw', 'Data' => 'If the email is registered, we have sent the restoration link to it.'));
