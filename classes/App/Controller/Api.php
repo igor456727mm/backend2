@@ -373,8 +373,8 @@ class Api extends \App\Page {
             $this->view->message = json_encode(array('Error' => 'User not found', 'Result' => 'addrole', 'Data' => ''));
         } else {
             $user->add('roles', $role);
-            if ($role->CODE=='ADMIN') {
-                $user->remove('org',$role);
+            if ($role->CODE == 'ADMIN') {
+                $user->remove('org', $role);
             }
             $this->view->message = json_encode(array('Error' => '', 'Result' => 'addrole', 'Data' => 'Роль добавлена.'));
         }
@@ -998,7 +998,9 @@ class Api extends \App\Page {
             return;
         }
 
-        if (($role != 'ADMIN') && ($role != 'ADMIN_LIGHT') && ($role != 'TRANSPORT_COMPANY') && ($role != 'RC') && ($role != 'VENDOR') && ($role != 'SHOP')) {
+        //  if 
+        //      (($role != 'ADMIN') && ($role != 'ADMIN_LIGHT') && ($role != 'TRANSPORT_COMPANY') && ($role != 'RC') && ($role != 'VENDOR') && ($role != 'SHOP')) 
+        {
             $this->view->message = json_encode(array('Error' => 'Role is wrong', 'Result' => 'reguser', 'Data' => ''));
             return;
         }
