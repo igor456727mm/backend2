@@ -1000,10 +1000,10 @@ class Api extends \App\Page {
 
         //  if 
         //      (($role != 'ADMIN') && ($role != 'ADMIN_LIGHT') && ($role != 'TRANSPORT_COMPANY') && ($role != 'RC') && ($role != 'VENDOR') && ($role != 'SHOP')) 
-        {
-            $this->view->message = json_encode(array('Error' => 'Role is wrong', 'Result' => 'reguser', 'Data' => ''));
-            return;
-        }
+      //  {
+      //      $this->view->message = json_encode(array('Error' => 'Role is wrong', 'Result' => 'reguser', 'Data' => ''));
+      //      return;
+      //  }
 
         $org = $this->check_field('org_id', 'org', 'ORG_ID', true, false, false);
         if (!is_object($org)) {
