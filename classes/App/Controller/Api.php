@@ -373,7 +373,7 @@ class Api extends \App\Page {
             $this->view->message = json_encode(array('Error' => 'User not found', 'Result' => 'addrole', 'Data' => ''));
         } else {
             $user->add('roles', $role);
-            if ($role->CODE == 'ADMIN') {
+            if (($role->CODE == 'ADMIN')||($role->CODE == 'ADMIN_LIGHT')) {
                 $user->remove('org', $role);
             }
             $this->view->message = json_encode(array('Error' => '', 'Result' => 'addrole', 'Data' => 'Роль добавлена.'));
