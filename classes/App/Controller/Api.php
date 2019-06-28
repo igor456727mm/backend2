@@ -374,7 +374,7 @@ class Api extends \App\Page {
         } else {
             $user->add('roles', $role);
             if (($role->CODE == 'ADMIN')||($role->CODE == 'ADMIN_LIGHT')) {
-                $user->remove('org', $role);
+                $user->ORG_ID=1;
             }
             $this->view->message = json_encode(array('Error' => '', 'Result' => 'addrole', 'Data' => 'Роль добавлена.'));
         }
