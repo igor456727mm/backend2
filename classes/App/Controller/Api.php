@@ -120,7 +120,7 @@ class Api extends \App\Page {
         }
         $secret = '3cf6553218a113836bb700289e6fd3bc7bbe1b5b871801a7f316d2df4f21620f';
         $token = Token::customPayload($payload, $secret);
-        $this->view->message = json_encode(array('Error' => '', 'Result' => 'jwttoken', 'Data' => "https://analytics.dostavkalm.ru:8443/embed/dashboard/" . $token));
+        $this->view->message = json_encode(array('Error' => '', 'Result' => 'jwttoken', 'Data' => "https://analytics.dostavkalm.ru/embed/dashboard/" . $token));
         $this->view->subview = 'apianswer';
     }
 
@@ -334,12 +334,16 @@ class Api extends \App\Page {
             $this->view->message = json_encode(array('Error' => $user, 'Result' => 'getuseractivationlink', 'Data' => ''));
             return;
         }
+        
+         require '../assets/config/env.php';
 
 
         if ((!$user->loaded()) || ($user->ACTIVE_FL == 1)) {
             $this->view->message = json_encode(array('Error' => 'User not found', 'Result' => 'getuseractivationlink', 'Data' => ''));
         } else {
-            $this->view->message = json_encode(array('Error' => '', 'Result' => 'getuseractivationlink', 'Data' => 'https://www.dostavkalm.ru/activate.xhtml?uid=' . $user->ACT_KEY));
+            $this->view->message = json_encode(array('Error' => '',
+                'Result' => 'getuseractivationlink',
+                'Data' => $site_url.'/activate.xhtml?uid=' . $user->ACT_KEY));
         }
 
         $this->view->subview = 'apianswer';
