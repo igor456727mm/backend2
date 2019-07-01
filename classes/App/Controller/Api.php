@@ -83,7 +83,7 @@ class Api extends \App\Page {
             }
             $secret = '3cf6553218a113836bb700289e6fd3bc7bbe1b5b871801a7f316d2df4f21620f';
             $token = Token::customPayload($payload, $secret);
-            $link = "https://analytics.dostavkalm.ru:8443/embed/dashboard/" . $token;
+            $link = "https://analytics.dostavkalm.ru/embed/dashboard/" . $token;
             $res = [];
             $res['link'] = $link;
             $res['name'] = $dashboard->DASHBOARD_NM;
