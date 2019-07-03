@@ -1558,7 +1558,7 @@ class Api extends \App\Page {
 
         $loctypes = $this->pixie->orm->get('loctype')->find_all();
 
-        $this->view->message = json_encode(array('Error' => '', 'Result' => 'getloctypes', 'Data' => $loctypes));
+        $this->view->message = json_encode(array('Error' => '', 'Result' => 'getloctypes', 'Data' => $loctypes->as_array(1)));
 
         $this->view->subview = 'apianswer';
     }
