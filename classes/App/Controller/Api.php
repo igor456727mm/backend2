@@ -1699,46 +1699,19 @@ class Api extends \App\Page {
         }
 
         if ($role_admin->loaded()) {
-            //$pnts = $this->pixie->orm->get('pnt')->with('transp')->with('locsrc')->with('loctgt')->with('sts')->find_all();
             $pnts = $this->pixie->orm->get('pntall')->
                     where('LOC_PLAN_DTTM', '>=', $date_from)->
                     where('and', array('LOC_PLAN_DTTM', '<=', $date_to))->
                     find_all();
-            //          $message = $this->pixie->orm->get('pntall')->
-            //                          where('LOC_PLAN_DTTM', '>=', $date_from)->
-            //                          where('and', array('LOC_PLAN_DTTM', '<=', $date_to))->
-            //                  query->query()[0];
-            //           $this->logerror('getallpoints', $message, 'ERROR');
         } else if ($role_transp->loaded() || $role_vendor->loaded()) {
-            //$pnts = $this->pixie->orm->get('transp')->where('ORG_ID', $org->id())->pnts->find_all();
             $pnts = $this->pixie->orm->get('pntall')->where('ORG_ID', $org->id())->
                     where('and', array('LOC_PLAN_DTTM', '>=', $date_from))->
                     where('and', array('LOC_PLAN_DTTM', '<=', $date_to))->
                     find_all();
         } else if ($role_rc->loaded()) {
             $pnts = $org->getallpoints_rc($date_from, $date_to);
-            //$pnts = $this->pixie->orm->get('org')->where('ORG_TYPE_CD','RC')->loc->pnts->find_all();
-            /* $pnts = $this->pixie->orm->get('pntall')->
-              where('ORG_SRC_ID', $org->id())->
-              where('or', array('ORG_TGT_ID', $org->id()))->
-              where('and', array('LOC_PLAN_DTTM', '>=', $date_from))->
-              where('and', array('LOC_PLAN_DTTM', '<=', $date_to))->
-              find_all(); */
-            //$pnts = $org->getallpoints($date_from, $date_to);
         } else if ($role_shop->loaded()) {
             $pnts = $org->getallpoints($date_from, $date_to);
-            //$pnts = $this->pixie->orm->get('org')->where('ORG_TYPE_CD','RC')->loc->pnts->find_all();
-            //  $pnts = $this->pixie->orm->get('pntall')->
-            //        where('ORG_TGT_ID', $org->id())->
-            //      transp->pntall->
-            //where('LOC_TGT_TYPE_CD', 'RC')->
-            // where('or',array('ORG_TGT_ID',$org->id()))->
-            //    find_all();
-            // query->query()[0];
-            // die($pnts);
-            // $pnts_shop = $this->pixie->orm->get('pntall')->
-            //         where('ORG_TGT_ID', $org->id())->
-            //         find_all();
         }
 
 
@@ -1748,25 +1721,6 @@ class Api extends \App\Page {
 
         foreach ($pnts as $pnt) {
             $rec = [];
-            /*
-              $rec['TU'] = $pnt->transp->TU;
-              $rec['FULL_NM'] = $pnt->transp->FULL_NM;
-              $rec['TRNSP_PNT_ID'] = $pnt->TRNSP_PNT_ID;
-              $rec['LOC_PLAN_DTTM'] = $pnt->LOC_PLAN_DTTM;
-              $rec['TRNSP_PNT_STS_TYPE_CD'] = $pnt->sts->TRNSP_PNT_STS_TYPE_NM;
-              $rec['STS_DTTM'] = $pnt->STS_DTTM;
-              if ($pnt->LOC_SRC_ID != '') {
-              $rec['LOC_SRC_NM'] = $pnt->locsrc->LOC_NM;
-              } else {
-              $rec['LOC_SRC_NM'] = '';
-              }
-              $rec['LOC_TGT_NM'] = $pnt->loctgt->LOC_NM;
-              $rec['LOC_ADDR'] = $pnt->loctgt->ADDR;
-              $rec['LOC_TGT_LAT'] = $pnt->loctgt->LAT;
-              $rec['LOC_TGT_LON'] = $pnt->loctgt->LON;
-              $rec['ORG_NM'] = $pnt->transp->org->ORG_NM;
-
-             */
             $rec['TU'] = $pnt->TU;
             $rec['FULL_NM'] = $pnt->FULL_NM;
             $rec['DRIVER_PHONE'] = $pnt->DRIVER_PHONE;
@@ -1786,26 +1740,9 @@ class Api extends \App\Page {
             $rec['LOC_TGT_TYPE_CD'] = $pnt->LOC_TGT_TYPE_CD;
             $rec['ORG_NM'] = $pnt->ORG_NM;
             $rec['ORG_TYPE_NM'] = $pnt->ORG_TYPE_NM;
-            //     if (!($role_transp->loaded() || $role_vendor->loaded())) {
             $rec['SHOP_MARK'] = $pnt->MARK;
             $rec['REL_STS_DTTM'] = $pnt->REL_STS_DTTM;
             $rec['SHOP_COMMENT'] = $pnt->MARK_COMMENT;
-            /*  $pnt1 = $this->pixie->orm->get('pnt')->
-              where('TRNSP_PNT_ID', $pnt->TRNSP_PNT_ID)->find();
-              $claims = $pnt1->claims->find_all();
-              $carr = [];
-              $j = 0;
-              foreach ($claims as $claim) {
-
-              $res1 = [];
-              $res1['CLAIM_TYPE_CD'] = $claim->CLAIM_TYPE_CD;
-              $res1['CLAIM_TYPE_NM'] = $claim->claimtype->CLAIM_TYPE_NM;
-              $carr[$j] = $res1;
-              $j = $j + 1;
-              }
-
-              $rec['CLAIMS'] = $carr; */
-            //   }
             $res[$i] = $rec;
             $i = $i + 1;
         }

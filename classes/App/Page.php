@@ -99,6 +99,7 @@ class Page extends \PHPixie\Controller {
             $log->save();
   */      
         $this->response->body = $this->view->render();
+        $this->response->headers=['Content-Type: application/json; charset=utf-8'];
     }
 
     //This method will redirect the user to the login page
