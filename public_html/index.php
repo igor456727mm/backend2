@@ -11,6 +11,7 @@ $loader->add('', $root.'/classes/');
 $pixie = new \App\Pixie();
 //header('Content-Type: application/json');
 $pixie->bootstrap($root)->handle_http_request();
+header('Content-Type: application/json');
 /*
 if (defined('API')) {
     header('Content-Type: application/json');
