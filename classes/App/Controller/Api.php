@@ -334,8 +334,8 @@ class Api extends \App\Page {
             $this->view->message = json_encode(array('Error' => $user, 'Result' => 'getuseractivationlink', 'Data' => ''));
             return;
         }
-        
-         require '../assets/config/env.php';
+
+        require '../assets/config/env.php';
 
 
         if ((!$user->loaded()) || ($user->ACTIVE_FL == 1)) {
@@ -343,7 +343,7 @@ class Api extends \App\Page {
         } else {
             $this->view->message = json_encode(array('Error' => '',
                 'Result' => 'getuseractivationlink',
-                'Data' => $site_url.'/activate.xhtml?uid=' . $user->ACT_KEY));
+                'Data' => $site_url . '/activate.xhtml?uid=' . $user->ACT_KEY));
         }
 
         $this->view->subview = 'apianswer';
@@ -377,8 +377,8 @@ class Api extends \App\Page {
             $this->view->message = json_encode(array('Error' => 'User not found', 'Result' => 'addrole', 'Data' => ''));
         } else {
             $user->add('roles', $role);
-            if (($role->CODE == 'ADMIN')||($role->CODE == 'ADMIN_LIGHT')) {
-                $user->ORG_ID=1;
+            if (($role->CODE == 'ADMIN') || ($role->CODE == 'ADMIN_LIGHT')) {
+                $user->ORG_ID = 1;
                 $user->save();
             }
             $this->view->message = json_encode(array('Error' => '', 'Result' => 'addrole', 'Data' => 'Роль добавлена.'));
@@ -1005,10 +1005,10 @@ class Api extends \App\Page {
 
         //  if 
         //      (($role != 'ADMIN') && ($role != 'ADMIN_LIGHT') && ($role != 'TRANSPORT_COMPANY') && ($role != 'RC') && ($role != 'VENDOR') && ($role != 'SHOP')) 
-      //  {
-      //      $this->view->message = json_encode(array('Error' => 'Role is wrong', 'Result' => 'reguser', 'Data' => ''));
-      //      return;
-      //  }
+        //  {
+        //      $this->view->message = json_encode(array('Error' => 'Role is wrong', 'Result' => 'reguser', 'Data' => ''));
+        //      return;
+        //  }
 
         $org = $this->check_field('org_id', 'org', 'ORG_ID', true, false, false);
         if (!is_object($org)) {
@@ -1540,6 +1540,25 @@ class Api extends \App\Page {
         }
 
         $this->view->message = json_encode(array('Error' => '', 'Result' => 'getlocs', 'Data' => $res));
+
+        $this->view->subview = 'apianswer';
+    }
+
+    public function action_getloctypes() {
+
+        if ($this->view->message) {
+            return;
+        }
+
+        $role = $this->user->roles->where('CODE', 'IN', $this->pixie->db->expr('("ADMIN","ADMIN_LIGHT")'))->find();
+        if (!$role->loaded()) {
+            $this->view->message = json_encode(array('Error' => "You dont't have access to this method", 'Result' => 'getloctypes', 'Data' => ''));
+            return;
+        }
+
+        $loctypes = $this->pixie->orm->get('loctype')->find_all();
+
+        $this->view->message = json_encode(array('Error' => '', 'Result' => 'getloctypes', 'Data' => $loctypes));
 
         $this->view->subview = 'apianswer';
     }
