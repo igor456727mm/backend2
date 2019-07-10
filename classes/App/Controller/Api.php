@@ -531,7 +531,7 @@ class Api extends \App\Page {
                 html_entity_decode($transp, ENT_QUOTES | ENT_XML1, 'UTF-8');
         $transps = json_decode($transp);
 
-        ///echo $transps;
+        //echo $transps;
         //die;
 
 
@@ -669,6 +669,23 @@ class Api extends \App\Page {
                 $org_type = '';
             }
             $org_type = filter_var($org_type, FILTER_SANITIZE_STRING);
+
+            if (isset($transp->tu_type)) {
+                $trnsp_type = $transp->tu_type;
+            } else {
+                $trnsp_type = '';
+            }
+            $trnsp_type = filter_var($trnsp_type, FILTER_SANITIZE_STRING);
+            if ($trnsp_type != '') {
+                $trnsp_type_e = $this->pixie->orm->get('trnsptype')->
+                        where('TRNSP_TYPE_NM', $trnsp_type)->
+                        find();
+                if (!$trnsp_type_e->loaded()) {
+                    $trnsp_type_e->TRNSP_TYPE_CD = $trnsp_type;
+                    $trnsp_type_e->TRNSP_TYPE_NM = $trnsp_type;
+                    $trnsp_type_e->save();
+                }
+            }
             /*  if (($org_type == '') || ($fio == 'Не указано')) {
               $this->view->message = json_encode(array('Error' => 'To date must not be empty', 'Result' => 'addtransp', 'Data' => ''));
               $transp->reason = 'Фамилия не указана';
@@ -731,10 +748,15 @@ class Api extends \App\Page {
 
             $org_e->save();
 
+
+
             $transp_e->TU = $tu;
             $transp_e->DRIVER_PHONE = $phone;
             $transp_e->FULL_NM = $fio;
             $transp_e->ORG_ID = $org_e->id();
+            if (isset($trnsp_type_e)) {
+                $transp_e->TRNSP_TYPE_CD = $trnsp_type_e->id();
+            }
             $transp_e->save();
 
             $to_e = $this->pixie->orm->get('loc')->
@@ -1262,8 +1284,9 @@ class Api extends \App\Page {
         $role_admin = $this->user->roles->where('CODE', 'ADMIN')->find();
         $role_shop = $this->user->roles->where('CODE', 'SHOP')->find();
         $role_rc = $this->user->roles->where('CODE', 'RC')->find();
+        $role_vendor = $this->user->roles->where('CODE', 'VENDOR')->find();
 
-        if (!($role_admin->loaded() || $role_shop->loaded() || $role_rc->loaded())) {
+        if (!($role_admin->loaded() || $role_shop->loaded() || $role_rc->loaded()|| $role_vendor->loaded())) {
             $this->view->message = json_encode(array('Error' => 'You dont have access to this method.', 'Result' => 'driverrelease', 'Data' => ''));
             return;
         }
@@ -1286,6 +1309,9 @@ class Api extends \App\Page {
         } else
         if ($pnt->loctgt->org->orgtype->id() == 'RC') {
             $mark_type_cd = 'RC_MARKS_TU';
+        } else 
+        if ($pnt->loctgt->org->orgtype->id() == 'VENDOR') {
+            $mark_type_cd = 'VENDOR_MARKS_TU';
         } else {
             $this->view->message = json_encode(array('Error' => 'Для данного типа точки нельзя устанавливать оценки', 'Result' => 'driverrelease', 'Data' => ''));
             return;
@@ -1371,8 +1397,6 @@ class Api extends \App\Page {
         }
         $pnt->setmark($mark_type_cd, $shop_mark->value, $shop_comment->value, $this->user->id());
         $pnt->setstatus('RELEASED', 0, $this->user->id(), $timezone, $dttm->value);
-
-
 
         $this->view->message = json_encode(array('Error' => '', 'Result' => 'driverrelease', 'Data' => $pnt->REL_STS_DTTM));
 
@@ -1743,6 +1767,7 @@ class Api extends \App\Page {
             $rec['SHOP_MARK'] = $pnt->MARK;
             $rec['REL_STS_DTTM'] = $pnt->REL_STS_DTTM;
             $rec['SHOP_COMMENT'] = $pnt->MARK_COMMENT;
+            $rec['TRNSP_TYPE_NM'] = $pnt->TRNSP_TYPE_NM;
             $res[$i] = $rec;
             $i = $i + 1;
         }

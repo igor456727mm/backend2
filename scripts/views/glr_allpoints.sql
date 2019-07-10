@@ -35,7 +35,9 @@ AS
 m.MARK,
 p.REL_STS_DTTM,
 m.MARK_COMMENT,
-t.DRIVER_PHONE
+t.DRIVER_PHONE,
+t.TRNSP_TYPE_CD,
+tp.TRNSP_TYPE_NM
 from 
  `glr_trnsp_pnt` `p` 
   join `glr_trnsp` `t` on `p`.`TRNSP_ID` = `t`.`TRNSP_ID`
@@ -44,4 +46,5 @@ from
   join `glr_trnsp_pnt_sts_type` `s` on `s`.`TRNSP_PNT_STS_TYPE_CD` = `p`.`TRNSP_PNT_STS_TYPE_CD`
   join `glr_org` `o` on `o`.`ORG_ID` = `t`.`ORG_ID`
   join `glr_org_type` `ot` on `o`.`ORG_TYPE_CD` = `ot`.`ORG_TYPE_CD`
-  left join glr_trnsp_pnt_mark m on m.TRNSP_PNT_ID=p.TRNSP_PNT_ID and MARK_TYPE_CD in ('SHOP_MARKS_TU','RC_MARKS_TU');
+  left join glr_trnsp_pnt_mark m on m.TRNSP_PNT_ID=p.TRNSP_PNT_ID and MARK_TYPE_CD in ('SHOP_MARKS_TU','RC_MARKS_TU')
+  left join glr_trnsp_type tp on tp.TRNSP_TYPE_CD=t.TRNSP_TYPE_CD;
